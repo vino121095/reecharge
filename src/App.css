@@ -1,0 +1,321 @@
+/* .App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+  
+} */
+
+
+/* .sidebar {
+  background: red;
+  padding: 15px;
+  height: 100vh;
+  position: fixed;
+}
+
+.header {
+  background: #007bff;
+  color: white;
+  padding: 15px;
+}
+
+.header h2 {
+  margin: 0;
+} */
+.modal{
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* sidebar & headbar  */
+
+#newsidebar{
+  /* background-color: #1f2f3e; */
+  height: 100vh !important;
+  /* padding: 0px 10px; */
+  z-index: 1000;
+                
+    }
+    .sidebar{
+      /* position: fixed;
+      background-color: #1f2f3e;
+      padding: 0px 50px; */
+      position: fixed;
+    background-color: #1f2f3e;
+    padding: 0px 15px;
+   width: 250px;
+    }
+    .sidebarsize{
+padding: 50px 15px 10px 15px;
+    }
+    
+    .newsidebarsize ul li{
+      /* background-color: red; */
+      margin-top: 10px;
+      padding: 6px 15px;
+      border-radius: 15px;
+    }
+    .newsidebarsize ul li:hover{
+      background-color: #0069d9;
+      color: white !important;
+    }
+    .newsidebarsize ul li:active{
+      background-color: #0069d9 !important;
+      color: white !important;
+    }
+    .newsidebarsize a{
+      color: white !important;
+      font-size: 18px;
+
+    }
+    #xbutton{
+      color: white !important;
+    }
+ 
+    .sidebar h4{
+      color: #0069d9;
+    }
+    .header{
+     
+      background-color: #1f2f3e !important;
+      padding: 8px 30px;
+      border-radius: 40px;
+      /* margin-top: 10px; */
+      margin: 10px 15px 0px 15px;
+    }
+    /* .sidebar{
+      background-color: #1f2f3e;
+      height: 100vh;
+      margin: 0px;
+      padding: 0px;
+    }
+   */
+
+/* sidebar & headbar  */
+
+
+
+  /* CSS  */
+  .overflow-auto {
+    overflow-x: auto;
+  }
+  
+  .nav-tabs {
+    white-space: nowrap; /* Prevent tabs from wrapping */
+    /* border-bottom: 1px solid red !important; */
+
+  }
+ 
+  .nav-tabs .nav-link{
+    color: #0069d9 !important;
+    font-weight: bold;
+  }
+  .badge{
+    color: #0069d9 !important;
+font-size: 32px !important;
+margin: 0 !important;
+font-family: 'Nunito Sans', sans-serif !important;
+
+  }
+  .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active{
+    background-color: #0069d9 !important;
+    color: white !important;
+  }
+  #plantext{
+    color: #7f7f7f;
+    margin: 0;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: 'Nunito Sans', sans-serif !important;
+
+  }
+  #striketext{
+    color: #4b4b4b !important;
+    font-weight: bold;
+    font-size: 20px;
+    font-family: 'Nunito Sans', sans-serif !important;
+margin: 0;
+}
+#payicon{
+  width: 55px !important;
+  border-radius: 70px;
+}
+#plancard{
+  border-radius: 15px;
+  background-color: #e3eeff !important;
+}  
+#planbigcard{
+margin: 0px 15px;
+background-color: #e3eeff !important;
+}
+  body{
+    background-color: #fafafa !important;
+  }
+ 
+h2{
+  font-size: 30px !important;
+  font-family: 'Nunito Sans', sans-serif !important;
+font-weight: bold !important;
+}
+  h4{
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 700 !important;
+  }
+  p{
+    font-family: 'Nunito Sans', sans-serif !important;
+
+  }
+  span{
+    font-size: 24px;
+    margin-right: 5px;
+  }
+  .card{
+    border: none !important;
+background-color: white !important;
+box-shadow: 0 0 37px rgba(8, 21, 66, .05);
+
+
+  }
+ 
+
+  #tablecard{
+    box-shadow: 0 0 37px rgba(8, 21, 66, .05);
+background-color: white;
+/* border-radius: 120px !important; */
+border: 1px solid #e1e1e1;
+  }
+  thead th{
+    background-color: #e5f0fb !important;
+    border: none;
+    font-family: 'Nunito Sans', sans-serif !important;
+  }
+
+  .nav-link{
+    color: white !important;
+    font-family: 'Nunito Sans', sans-serif !important;
+
+  }
+  
+  #signcard{
+    padding: 40px 10px;
+  }
+  .card-header{
+border: none !important;
+background-color: white !important;
+  }
+  .card-body{
+    border: none !important;
+background-color: white !important;
+  }
+  .card-footer{
+    border: none !important;
+    background-color: white !important;
+  }
+  a{
+    text-decoration: none !important;
+    font-family: 'Nunito Sans', sans-serif !important;
+
+  }
+  label{
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 500 !important;
+
+  }
+  input{
+    
+    font-family: 'Nunito Sans', sans-serif !important;
+padding: 10px 10px !important;
+
+  }
+  select{
+    font-family: 'Nunito Sans', sans-serif !important;
+padding: 10px 10px !important;
+
+appearance: none; /* Remove default arrow */
+background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 16 16"><path d="M1 1l7 7 7-7H1z"/></svg>'); /* Arrow SVG */
+background-repeat: no-repeat;
+background-position: right 10px center; /* Position the arrow */
+background-size: 10px; /* Size of the arrow */
+padding-right: 30px; /* Space for the arrow */
+
+border: 1px solid #ced4da; /* Adjust border color */
+  }
+  select::placeholder{
+    color: #7f7f7f !important;
+  font-family: 'Nunito Sans', sans-serif;
+
+  }
+  input::placeholder{
+    color: #7f7f7f !important;
+  font-family: 'Nunito Sans', sans-serif;
+
+  }
+  .form-check-input{
+    margin-right: 10px;
+    /* border: 1px solid red; */
+  }
+  .form-check-input:checked{
+    border: none;
+  }
+  .form-check .form-check-input{
+    border: 1px solid #9f9f9f;
+  }
+.btn-primary{
+background-color: #0069d9 !important;
+font-family: 'Nunito Sans', sans-serif !important;
+border: none;
+
+}
+.btn-primary:hover{
+  background-color: #1f2f3e !important;
+  font-family: 'Nunito Sans', sans-serif;
+  border: 1px solid #1f2f3e !important;
+/* border: none; */
+}
+
+  /* CSS  */
+
+  @media (min-width: 1000px) and (max-width: 1500px) {
+    /* Your styles here */
+    .sidebar{
+      width: 200px;
+    }
+}
+@media (min-width: 1601px) {
+  /* Your styles here */
+  .sidebar{
+    width: 310px;
+  }
+}
