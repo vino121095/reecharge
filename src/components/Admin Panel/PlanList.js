@@ -25,7 +25,7 @@ const PlansList = () => {
     useEffect(() => {
       const fetchOperators = async () => {
           try {
-              const response = await fetch("http://localhost:8000/api/operators");
+              const response = await fetch("http://recharge.boonnet.co/api/operators");
               const data = await response.json();
               if (response.ok) {
                   // Assuming the response is an array of objects with an `operator` property
@@ -45,7 +45,7 @@ const PlansList = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/plan_list');
+        const response = await axios.get('http://recharge.boonnet.co/api/plan_list');
         if (Array.isArray(response.data.data)) {
           setPlans(response.data.data);
         } else {
@@ -64,7 +64,7 @@ const PlansList = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/add_category');
+        const response = await axios.get('http://recharge.boonnet.co/api/add_category');
         setCategories(response.data.data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -89,7 +89,7 @@ const PlansList = () => {
     };
  
     try {
-      const response = await fetch('http://localhost:8000/api/plan_list', {
+      const response = await fetch('http://recharge.boonnet.co/api/plan_list', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -114,7 +114,7 @@ const PlansList = () => {
  
   const handleUpdatePlan = async (formData) => {
     try {
-      await axios.put(`http://localhost:8000/api/plan_list/${currentPlan.pid}`, formData);
+      await axios.put(`http://recharge.boonnet.co/api/plan_list/${currentPlan.pid}`, formData);
       setPlans(plans.map(p => (p.pid === currentPlan.pid ? { ...p, ...formData } : p)));
       setSuccess('Plan updated successfully!');
     } catch (err) {
@@ -143,7 +143,7 @@ const PlansList = () => {
   const handleDeleteClick = async (planToDelete) => {
     if (window.confirm("Are you sure you want to delete this plan?")) {
       try {
-        await axios.delete(`http://localhost:8000/api/plan_list/${planToDelete.pid}`);
+        await axios.delete(`http://recharge.boonnet.co/api/plan_list/${planToDelete.pid}`);
         setPlans(plans.filter(plan => plan.pid !== planToDelete.pid));
       } catch (error) {
         console.error("Error deleting plan:", error);
@@ -418,7 +418,7 @@ const AddPlanForm = ({
  
     if (trimmedCategory && !categories.map(cat => cat.add_category).includes(trimmedCategory)) {
       try {
-        const response = await fetch('http://localhost:8000/api/add_category', {
+        const response = await fetch('http://recharge.boonnet.co/api/add_category', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

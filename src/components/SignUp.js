@@ -48,7 +48,7 @@ function SignUp() {
         };
    
         try {
-            const response = await fetch('http://localhost:8000/api/register', {
+            const response = await fetch('http://recharge.boonnet.co/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

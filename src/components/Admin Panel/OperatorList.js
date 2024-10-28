@@ -21,7 +21,7 @@ function OperatorList() {
     useEffect(() => {
         // Fetch initial operators list from the API
         const fetchOperators = async () => {
-            const response = await axios.get('http://localhost:8000/api/operators');
+            const response = await axios.get('http://recharge.boonnet.co/api/operators');
             setOperatorsList(response.data);
         };
         fetchOperators();
@@ -54,7 +54,7 @@ function OperatorList() {
         formData.append('image', imageFile);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/operators', formData, {
+            const response = await axios.post('http://recharge.boonnet.co/api/operators', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -75,7 +75,7 @@ function OperatorList() {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:8000/api/operators/${id}`);
+            await axios.delete(`http://recharge.boonnet.co/api/operators/${id}`);
             setOperatorsList(operatorsList.filter(op => op.oid !== id));
         } catch (error) {
             console.error("Error deleting operator:", error);
@@ -102,7 +102,7 @@ function OperatorList() {
         }
 
         try {
-            const response = await axios.put(`http://localhost:8000/api/operators/${currentOperator.oid}`, formData, {
+            const response = await axios.put(`http://recharge.boonnet.co/api/operators/${currentOperator.oid}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -242,7 +242,7 @@ function OperatorList() {
                                             <td>
                                                 {op.image ? (
                                                     <img
-                                                        src={`http://localhost:8000/${op.image}`} // Adjust this path as needed
+                                                        src={`http://recharge.boonnet.co/${op.image}`} // Adjust this path as needed
                                                         alt="Logo"
                                                         style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                                     />
