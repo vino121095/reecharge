@@ -51,7 +51,7 @@ function Admin() {
         };
 
         try {
-            const response = await fetch('http://recharge.boonnet.co/api/admin', {
+            const response = await fetch('https://recharge.boonnet.co/api/admin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

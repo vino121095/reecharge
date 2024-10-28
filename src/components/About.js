@@ -20,7 +20,7 @@ function About() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://recharge.boonnet.co/api/add_category');
+                const response = await axios.get('https://recharge.boonnet.co/api/add_category');
                 const fetchedCategories = response.data.data || [];
                 setCategories(fetchedCategories);
                 if (fetchedCategories.length > 0) {
@@ -40,7 +40,7 @@ function About() {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
-                const response = await axios.get('http://recharge.boonnet.co/api/plan_list');
+                const response = await axios.get('https://recharge.boonnet.co/api/plan_list');
                 if (Array.isArray(response.data.data)) {
                     setPlans(response.data.data);
                     if (categories.length > 0) {

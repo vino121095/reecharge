@@ -25,7 +25,7 @@ const Login = () => {
  
         try {
  
-            const response = await fetch('http://recharge.boonnet.co/api/adminLogin', {
+            const response = await fetch('https://recharge.boonnet.co/api/adminLogin', {
  
                 method: 'POST',
  

@@ -13,7 +13,7 @@ const Home = () => {
     useEffect(() => {
         const fetchOperators = async () => {
             try {
-                const response = await fetch("http://recharge.boonnet.co/api/operators");
+                const response = await fetch("https://recharge.boonnet.co/api/operators");
                 const data = await response.json();
                 if (response.ok) {
                     setOperatorsList(data);
@@ -39,7 +39,7 @@ const Home = () => {
         };
 
         try {
-            const response = await fetch('http://recharge.boonnet.co/api/home_data', {
+            const response = await fetch('https://recharge.boonnet.co/api/home_data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
