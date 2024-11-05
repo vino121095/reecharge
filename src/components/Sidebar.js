@@ -22,6 +22,9 @@ function Sidebar({ isOpen, toggleSidebar }) {
                     <Link to="/operatorlist">
                         <li className={activeLink === '/operatorlist' ? 'active-link' : ''}>Operators</li>
                     </Link>
+                    <Link to="/addemployees">
+                        <li className={activeLink === '/addemployees' ? 'active-link' : ''}>Add Employees</li>
+                    </Link>
                 </ul>
             </div>
 

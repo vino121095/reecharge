@@ -40,6 +40,7 @@ const operatorRoutes = require('./routes/operatorRoutes');
 const planListRoutes = require('./routes/planListRoutes');
 const addCategoryRoutes = require('./routes/addCategoryRoutes');
 const homeDataRoutes = require('./routes/homeDataRoutes');
+const addEmployeeRoutes = require('./routes/addEmployeeRoutes');
 
 // Setup API routes
 app.use('/api', adminRoutes);
@@ -48,6 +49,7 @@ app.use('/api', operatorRoutes);
 app.use('/api', planListRoutes);
 app.use('/api', addCategoryRoutes);
 app.use('/api', homeDataRoutes);
+app.use('/api', addEmployeeRoutes);
 
 console.log('✅ Routes initialized successfully');
 
