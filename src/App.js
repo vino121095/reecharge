@@ -12,6 +12,7 @@ import OperatorList from './components/Admin Panel/OperatorList';
 import PlanDetail from './components/PlanDetail';
 import Admin from './components/Admin Panel/Admin';
 import AddEmployees from './components/Admin Panel/AddEmployees';
+import PaidList from './components/Admin Panel/PaidList';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/operatorlist" element={<OperatorList />} />
             <Route path="/adminsignup" element={<Admin />} />
             <Route path="/addemployees" element={<AddEmployees />} />
+            <Route path="/paidlist" element={<PaidList />} />
           </Routes>
         </div>
       </div>

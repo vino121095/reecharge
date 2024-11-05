@@ -14,7 +14,10 @@ function Sidebar({ isOpen, toggleSidebar }) {
             <div className='newsidebarsize'>
                 <ul>
                     <Link to="/userlist">
-                        <li className={activeLink === '/userlist' ? 'active-link' : ''}>Users</li>
+                        <li className={activeLink === '/userlist' ? 'active-link' : ''}>Recharge</li>
+                    </Link>
+                    <Link to="/paidlist">
+                        <li className={activeLink === '/paidlist' ? 'active-link' : ''}>Paid List</li>
                     </Link>
                     <Link to="/planlist">
                         <li className={activeLink === '/planlist' ? 'active-link' : ''}>Plans</li>

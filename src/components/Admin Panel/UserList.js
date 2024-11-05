@@ -5,48 +5,135 @@ import AdminLayout from '../AdminLayout';
 function UserList() {
   const [modalShow, setModalShow] = useState(false);
   const [operators, setOperators] = useState([]);
+  const [paidList, setPaidList] = useState([]); // To store paid users
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [showView, setShowView] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterOperator, setFilterOperator] = useState('');
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'ascending' });
-  const [deleteModalShow, setDeleteModalShow] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
+  const [editModalShow, setEditModalShow] = useState(false);
+  const [newStatus, setNewStatus] = useState('Pending');
+  const [viewUser, setViewUser] = useState(null); // To handle view modal
  
+  // Fetch data from API and local storage for paid users
   useEffect(() => {
     const fetchOperators = async () => {
-        try {
-            const response = await fetch('https://recharge.boonnet.co/api/home_data');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            setOperators(data);
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
+      try {
+        const response = await fetch('https://recharge.boonnet.co/api/home_data');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
+        const data = await response.json();
+ 
+        const sanitizedData = data.map((user) => ({
+          ...user,
+          plan_type: user.plan_type || '',
+          mobile_number: user.mobile_number || '',
+          operator: user.operator || '',
+          createdAt: user.createdAt || '',
+          updatedAt: user.updatedAt || '',
+          username: user.username || 'N/A', // Fallback to "N/A" if missing
+          price: user.price || 'N/A', // Fallback to "N/A" if missing
+          status: user.status || 'Pending', // Fallback to "Pending" if missing
+          type: user.type || 'Basic', // Fallback to "Basic" if missing
+        }));
+ 
+        setOperators(sanitizedData);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
     };
  
-    fetchOperators();
-}, []);
+    const storedPaidList = JSON.parse(localStorage.getItem('paidList')) || [];
+    setPaidList(storedPaidList);
  
-if (loading) return <div>Loading...</div>;
-if (error) return <div>Error: {error}</div>;
+    fetchOperators(); // Call the function on component mount
+  }, []);
  
-  const users = [
-    { id: 1, username: 'john_doe', type: 'Prepaid', phoneNumber: '123-456-7890', price: '$10', dateTime: '2024-01-01 10:00 AM', status: 'Completed' },
-  ];
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
  
-  const filteredUsers = users.filter(user =>
-    (filterOperator === '' || user.operator === filterOperator) &&
-    (user.username.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const handleEditClick = (user) => {
+    setCurrentUser(user);
+    setEditModalShow(true);
+    setNewStatus(user.status); // Set the current status for editing
+  };
+ 
+  const handleStatusChange = (e) => {
+    setNewStatus(e.target.value);
+  };
+ 
+  const handleSaveEdit = () => {
+    const updatedUser = { ...currentUser, status: newStatus };
+ 
+    // Update the operators list by changing the status to Paid
+    const updatedOperators = operators.map((user) =>
+      user.id === updatedUser.id ? updatedUser : user
+    );
+ 
+    // Save the updated operators list to localStorage
+    localStorage.setItem('operators', JSON.stringify(updatedOperators));
+ 
+    // If the status is changed to Paid, move the user to PaidList
+    if (newStatus === 'Paid') {
+      const newPaidList = [...paidList, updatedUser];
+      setPaidList(newPaidList);
+      localStorage.setItem('paidList', JSON.stringify(newPaidList));
+ 
+      // Remove the user from the operators list
+      const filteredOperators = updatedOperators.filter((user) => user.id !== updatedUser.id);
+      setOperators(filteredOperators);
+    } else {
+      // Just update the status if PaidList is already filled
+      setOperators(updatedOperators);
+    }
+ 
+    setEditModalShow(false); // Close the modal
+  };
+ 
+  const handleDelete = (userId) => {
+    // Remove the user from the operators list
+    const updatedOperators = operators.filter((user) => user.id !== userId);
+ 
+    // Save the updated operators list to localStorage
+    localStorage.setItem('operators', JSON.stringify(updatedOperators));
+ 
+    // Also remove from paidList if user is in the paidList
+    const updatedPaidList = paidList.filter((user) => user.id !== userId);
+    localStorage.setItem('paidList', JSON.stringify(updatedPaidList));
+ 
+    // Update the state
+    setOperators(updatedOperators);
+    setPaidList(updatedPaidList);
+  };
+ 
+  // View action to show user details in a modal
+  const handleView = (user) => {
+    setViewUser(user);
+    setShowView(true);
+  };
+ 
+  const handleCloseView = () => {
+    setShowView(false);
+    setViewUser(null);
+  };
+ 
+  // Filter and pagination
+  const filteredUsers = operators.filter((user) => {
+    const username = user.operator || ''; // Fallback to an empty string if operator is missing
+    const term = searchTerm || ''; // Fallback to an empty string if searchTerm is missing
+    return username.toLowerCase().includes(term.toLowerCase());
+  });
  
   const sortedUsers = filteredUsers.sort((a, b) => {
     const aValue = a[sortConfig.key];
@@ -61,47 +148,21 @@ if (error) return <div>Error: {error}</div>;
     return 0;
   });
  
+  // Pagination logic
   const totalItems = sortedUsers.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const currentItems = sortedUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
  
-  const combinedItems = [...operators, ...currentItems];
- 
-  const handleSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
  
-  const handleViewClick = (user) => {
-    setCurrentUser(user);
-    setShowView(true);
-    setModalShow(true);
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
  
-  const handleClose = () => {
-    setModalShow(false);
-    setCurrentUser(null);
-    setShowView(false);
-  };
- 
-  const handleDeleteClick = (user) => {
-    setUserToDelete(user);
-    setDeleteModalShow(true);
-  };
- 
-  const confirmDelete = () => {
-    // Implement the delete functionality here
-    console.log("Delete user with id:", userToDelete.id);
-    setDeleteModalShow(false);
-    setUserToDelete(null);
-    // Optionally, filter users state here
-  };
- 
-  const handleModalClick = (e) => {
-    e.stopPropagation();
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
  
   return (
@@ -116,29 +177,26 @@ if (error) return <div>Error: {error}</div>;
           <div className="col-md-4 mt-2">
             <input
               type="text"
-              className="form-control"
-              placeholder="Search by Username"
+              className="form-control mb-3"
+              placeholder="Search by Operator"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
- 
           <div className="col-md-8 d-flex justify-content-end mt-2">
             <div className="col-md-1 me-2">
-              <select
-                className="form-select"
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
-              >
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={20}>20</option>
-              </select>
+              {/* Items per page selection */}
+              <div className="form-group">
+                <select className="form-control mb-3" value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}>
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
- 
-        {/* Scrollable Table with Fixed Header */}
  
         <div style={{ height: '450px', overflowY: 'auto' }}>
           <table className="table text-center" style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -156,141 +214,170 @@ if (error) return <div>Error: {error}</div>;
                     <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
                   )}
                 </th>
-                <th onClick={() => handleSort('operator')} style={{ cursor: 'pointer' }}>
-                  Operator
-                  {sortConfig.key === 'operator' && (
-                    <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
-                  )}
-                </th>
-                <th onClick={() => handleSort('type')} style={{ cursor: 'pointer' }}>
-                  Type
-                  {sortConfig.key === 'type' && (
-                    <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
-                  )}
-                </th>
-                <th onClick={() => handleSort('phoneNumber')} style={{ cursor: 'pointer' }}>
-                  Phone Number
-                  {sortConfig.key === 'phoneNumber' && (
-                    <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
-                  )}
-                </th>
-                <th onClick={() => handleSort('price')} style={{ cursor: 'pointer' }}>
-                  Price
-                  {sortConfig.key === 'price' && (
-                    <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
-                  )}
-                </th>
-                <th onClick={() => handleSort('dateTime')} style={{ cursor: 'pointer' }}>
-                  Date & Time
-                  {sortConfig.key === 'dateTime' && (
-                    <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
-                  )}
-                </th>
-                <th onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
-                  Status
-                  {sortConfig.key === 'status' && (
-                    <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
-                  )}
-                </th>
+                <th>Phone number</th>
+                <th>Operator</th>
+                <th>Type</th>
+                <th>Date & Time</th>
+                <th>Price</th>
+                <th>Status</th>
+ 
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-                        {combinedItems.map((item, index) => (
-                            <tr key={item.id}>
-                                <td>{index + 1}</td>
-                                <td></td> {/* Fallback if username is not available */}
-                                <td>{item.operator}</td>
-                                <td>{item.plan_type}</td> {/* Use plan_type or type */}
-                                <td>{item.mobile_number}</td> {/* Mobile number field */}
-                                <td></td> {/* Fallback if price is not available */}
-                                <td>{new Date(item.createdAt).toLocaleString()}</td> {/* Use createdAt or dateTime */}
-                                <td></td> {/* Fallback if status is not available */}
-                                <td>
-                                    <i
-                                        onClick={() => handleViewClick(item)}
-                                        style={{ cursor: "pointer", color: "#007bff", marginRight: "10px" }}
-                                        className="bi bi-eye-fill"
-                                    />
-                                    <i
-                                        onClick={() => handleDeleteClick(item)}
-                                        style={{ cursor: "pointer", color: "red" }}
-                                        className="bi bi-trash-fill"
-                                    />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
+              {currentItems.length === 0 ? (
+                <tr>
+                  <td colSpan="8">No users found.</td>
+                </tr>
+              ) : (
+                currentItems.map((user, index) => (
+                  <tr key={user.id}>
+                    <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                    <td>{user.username}</td>
+                    <td>{user.mobile_number}</td>
+                    <td>{user.operator}</td>
+                    <td>{user.plan_type}</td>
+                    <td>{new Date(user.createdAt).toLocaleString()}</td>
+                    <td>{user.price}</td>
+                    <td>{user.status}</td>
+ 
+                    <td>
+                      {/* <button onClick={() => handleView(user)} className="btn btn-info btn-sm me-2">
+                        View
+                      </button>
+                      <button onClick={() => handleDelete(user.id)} className="btn btn-danger btn-sm me-2">
+                        Delete
+                      </button>
+                      <button onClick={() => handleEditClick(user)} className="btn btn-primary btn-sm">
+                        Edit
+                      </button> */}
+                        <i
+                      onClick={() => handleView(user)}
+                      style={{ cursor: "pointer", color: "#007bff", marginRight: "10px" }}
+                       className="bi bi-eye-fill"></i>
+                   
+                 
+                      <i
+                      onClick={() => handleEditClick(user)}
+                      style={{ cursor: "pointer", color: "#ffc107", marginRight: "10px" }}
+                       className="bi bi-pencil-fill"></i>
+                 
+                   
+                      <i
+                      onClick={() => handleDelete(user.id)}
+                      style={{ cursor: "pointer", color: "red", marginRight: "10px" }}
+                       className="bi bi-trash-fill"></i>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
  
         {/* Pagination Controls */}
-        <nav>
+        <nav aria-label="Page navigation" className="mt-4">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
               <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
             </li>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                <button className="page-link" onClick={() => setCurrentPage(index + 1)}>{index + 1}</button>
+            {currentPage > 3 && (
+              <li className="page-item">
+                <button className="page-link" onClick={() => setCurrentPage(1)}>1</button>
               </li>
-            ))}
+            )}
+            {currentPage > 4 && (
+              <li className="page-item disabled">
+                <span className="page-link">...</span>
+              </li>
+            )}
+            {Array.from({ length: 3 }, (_, i) => {
+              const pageNumber = currentPage - 1 + i;
+              if (pageNumber > 0 && pageNumber <= totalPages) {
+                return (
+                  <li key={pageNumber} className={`page-item ${currentPage === pageNumber ? 'active' : ''}`}>
+                    <button className="page-link" onClick={() => setCurrentPage(pageNumber)}>{pageNumber}</button>
+                  </li>
+                );
+              }
+              return null;
+            })}
+            {currentPage < totalPages - 2 && (
+              <li className="page-item disabled">
+                <span className="page-link">...</span>
+              </li>
+            )}
+            {currentPage < totalPages - 2 && (
+              <li className="page-item">
+                <button className="page-link" onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>
+              </li>
+            )}
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
               <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
             </li>
           </ul>
         </nav>
  
-        {/* Modal for Viewing User */}
-        {modalShow && (
-          <div className={`modal ${modalShow ? 'show' : ''}`} style={{ display: modalShow ? 'block' : 'none' }} onClick={handleClose}>
-            <div className="modal-dialog modal-dialog-centered" onClick={handleModalClick}>
+        {/* Modal for editing status */}
+        {editModalShow && currentUser && (
+          <div className="modal show" tabIndex="-1" style={{ display: 'block' }}>
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">View User</h5>
+                  <h5 className="modal-title">Edit User Status</h5>
+                  <button className="btn-close" onClick={() => setEditModalShow(false)}></button>
                 </div>
-                <div className="modal-body text-left">
-                  {currentUser && (
-                    <div>
-                      <p style={{ margin: 0 }}><strong>Username:</strong> {currentUser.username}</p>
-                      <p style={{ margin: 0 }}><strong>Operator:</strong> {currentUser.operator}</p>
-                      <p style={{ margin: 0 }}><strong>Type:</strong> {currentUser.type}</p>
-                      <p style={{ margin: 0 }}><strong>Phone Number:</strong> {currentUser.phoneNumber}</p>
-                      <p style={{ margin: 0 }}><strong>Price:</strong> {currentUser.price}</p>
-                      <p style={{ margin: 0 }}><strong>Date & Time:</strong> {currentUser.dateTime}</p>
-                      <p style={{ margin: 0 }}><strong>Status:</strong> {currentUser.status}</p>
-                    </div>
-                  )}
+                <div className="modal-body">
+                  <label htmlFor="status">Status</label>
+                  <select
+                    id="status"
+                    className="form-control"
+                    value={newStatus}
+                    onChange={handleStatusChange}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={handleClose}>Close</button>
+                  <button className="btn btn-secondary" onClick={() => setEditModalShow(false)}>Close</button>
+                  <button className="btn btn-primary" onClick={handleSaveEdit}>Save</button>
                 </div>
               </div>
             </div>
           </div>
         )}
-        {modalShow && <div className="modal-backdrop fade show" />}
  
-        {/* Confirmation Modal for Deletion */}
-        {deleteModalShow && (
-          <div className={`modal show`} style={{ display: 'block' }} onClick={() => setDeleteModalShow(false)}>
-            <div className="modal-dialog modal-dialog-centered" onClick={handleModalClick}>
-              <div className="modal-content" >
+        {/* Modal for viewing user details */}
+        {showView && viewUser && (
+          <div className="modal show" tabIndex="-1" style={{ display: 'block' }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Confirm Deletion</h5>
+                  <h5 className="modal-title">User Details</h5>
+                  <button className="btn-close" onClick={handleCloseView}></button>
                 </div>
-                <div className="modal-body text-left">
-                  <p>Are you sure you want to delete this user?</p>
+                <div className="modal-body">
+                  <p><strong>Username:</strong> {viewUser.username}</p>
+                  <p><strong>Phone Number:</strong> {viewUser.mobile_number}</p>
+                  <p><strong>Operator:</strong> {viewUser.operator}</p>
+                  <p><strong>Type:</strong> {viewUser.plan_type}</p>
+               
+                  <p><strong>Created At:</strong> {new Date(viewUser.createdAt).toLocaleString()}</p>
+                  <p><strong>Updated At:</strong> {new Date(viewUser.updatedAt).toLocaleString()}</p>
+                  <p><strong>Price:</strong> {viewUser.price}</p>
+                 
+                  <p><strong>Status:</strong> {viewUser.status}</p>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-dark" onClick={confirmDelete}>Yes</button>
-                  <button type="button" className="btn btn-light" onClick={() => setDeleteModalShow(false)}>No</button>
+                  <button className="btn btn-secondary" onClick={handleCloseView}>Close</button>
                 </div>
               </div>
             </div>
           </div>
         )}
-        {deleteModalShow && <div className="modal-backdrop fade show" />}
+ 
+       
       </div>
     </AdminLayout>
   );
