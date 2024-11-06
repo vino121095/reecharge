@@ -1,10 +1,23 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
+import React, { useState } from 'react';
+ 
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+ 
 function Sidebar({ isOpen, toggleSidebar }) {
-    const location = useLocation(); // Get the current location
-    const activeLink = location.pathname; // Use the current pathname as active link
-
+    const location = useLocation();  // Get the current location
+    const activeLink = location.pathname;  // Use the current pathname as active link
+ 
+    // Get the user role from localStorage
+    const userType = localStorage.getItem('userType');  // Can be 'admin' or 'employee'
+ 
+    const navigate = useNavigate(); // Use navigate to redirect after logout
+ 
+    const handleLogout = () => {
+        // Clear user-related data from localStorage (or sessionStorage)
+        localStorage.removeItem('userType'); // You can also clear tokens if stored in localStorage/sessionStorage
+        // Redirect to login page
+        navigate('/admin');
+    };
+ 
     return (
         <div className={`sidebar ${isOpen ? 'd-block' : 'd-none d-md-block'}`} id='newsidebar'>
             <div className='sidebarsize d-flex justify-content-between align-items-center'>
@@ -25,12 +38,23 @@ function Sidebar({ isOpen, toggleSidebar }) {
                     <Link to="/operatorlist">
                         <li className={activeLink === '/operatorlist' ? 'active-link' : ''}>Operators</li>
                     </Link>
-                    <Link to="/addemployees">
-                        <li className={activeLink === '/addemployees' ? 'active-link' : ''}>Add Employees</li>
-                    </Link>
+ 
+                    {/* Conditionally render "Add Employees" based on userType */}
+                    {userType === 'admin' && (
+                        <Link to="/addemployees">
+                            <li className={activeLink === '/addemployees' ? 'active-link' : ''}>Add Employees</li>
+                        </Link>
+                    )}
                 </ul>
             </div>
-
+ 
+ 
+ {/* Logout button at the bottom of sidebar */}
+ <div className="mt-auto">
+                <button className="btn btn-danger w-100" onClick={handleLogout}>Logout</button>
+            </div>
+ 
+ 
             {/* CSS for active link */}
             <style jsx>{`
                 .active-link {
@@ -41,5 +65,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
         </div>
     );
 }
-
+ 
 export default Sidebar;
+ 
+ 

@@ -3,20 +3,20 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-
+ 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("employee"); // Default to employee
   const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+ 
     // Select the appropriate endpoint based on user type
-    const endpoint = userType === "admin" ? 'https://recharge.boonnet.co/api/adminLogin' : 'https://recharge.boonnet.co/api/employees-login';
-
+    const endpoint = userType === "admin" ? 'http://localhost:8001/api/adminLogin' : 'http://localhost:8001/api/employees-login';
+ 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -25,15 +25,15 @@ const Login = () => {
         },
         body: JSON.stringify({ email, password }), // Send email and password
       });
-
+ 
       const data = await response.json();
-
+ 
       if (response.ok) {
         console.log("Login successful:", data);
         // Store user type or token if needed, e.g., in localStorage
         localStorage.setItem('userType', userType); // Optional: store user type for session management
         // Redirect based on user type
-        navigate(userType === "admin" ? "/userlist" : "/userlist"); 
+        navigate(userType === "admin" ? "/userlist" : "/userlist");
         // Clear input fields only after successful login
         setEmail("");
         setPassword("");
@@ -41,17 +41,17 @@ const Login = () => {
         console.log("Login Failed:", data);
         alert(data.msg || "Login failed"); // Provide user feedback
       }
-
+ 
     } catch (error) {
       console.error("Error during login:", error);
       alert("An error occurred. Please try again.");
     }
   };
-
+ 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
+ 
   return (
     <div className="container">
       <div className="row justify-content-center align-items-center vh-100">
@@ -64,28 +64,28 @@ const Login = () => {
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="userType">Login As</label>
-                  <div className="mt-2">
+                  <div className="d-flex gap-4 mt-2">
                     <div className="form-check">
-                      <input 
-                        type="radio" 
-                        id="employee" 
-                        name="userType" 
-                        value="employee" 
-                        checked={userType === "employee"} 
-                        onChange={(e) => setUserType(e.target.value)} 
-                        className="form-check-input" 
+                      <input
+                        type="radio"
+                        id="employee"
+                        name="userType"
+                        value="employee"
+                        checked={userType === "employee"}
+                        onChange={(e) => setUserType(e.target.value)}
+                        className="form-check-input"
                       />
                       <label htmlFor="employee" className="form-check-label">Employee</label>
                     </div>
                     <div className="form-check">
-                      <input 
-                        type="radio" 
-                        id="admin" 
-                        name="userType" 
-                        value="admin" 
-                        checked={userType === "admin"} 
-                        onChange={(e) => setUserType(e.target.value)} 
-                        className="form-check-input" 
+                      <input
+                        type="radio"
+                        id="admin"
+                        name="userType"
+                        value="admin"
+                        checked={userType === "admin"}
+                        onChange={(e) => setUserType(e.target.value)}
+                        className="form-check-input"
                       />
                       <label htmlFor="admin" className="form-check-label">Admin</label>
                     </div>
@@ -93,14 +93,14 @@ const Login = () => {
                 </div>
                 <div className="form-group mt-4">
                   <label htmlFor="username">Email</label>
-                  <input 
-                    type="email" 
-                    className="form-control mt-2" 
-                    id="username" 
+                  <input
+                    type="email"
+                    className="form-control mt-2"
+                    id="username"
                     placeholder="Enter email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)} 
-                    required 
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="form-group mt-4 position-relative">
@@ -139,5 +139,5 @@ const Login = () => {
     </div>
   );
 }
-
+ 
 export default Login;

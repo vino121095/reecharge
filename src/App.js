@@ -10,7 +10,6 @@ import UserList from './components/Admin Panel/UserList';
 import PlanList from './components/Admin Panel/PlanList';
 import OperatorList from './components/Admin Panel/OperatorList';
 import PlanDetail from './components/PlanDetail';
-import Admin from './components/Admin Panel/Admin';
 import AddEmployees from './components/Admin Panel/AddEmployees';
 import PaidList from './components/Admin Panel/PaidList';
 
@@ -19,18 +18,19 @@ function App() {
       <div className="App">
         <div>
           <Routes>
-            {/* <Route path="/" element={<Home />} /> */}
+            {/* Frontend */}
             <Route path="/" element={<SignIn />} />
 
             <Route path="/about" element={<About />} />
             <Route path="/plandetail" element={<PlanDetail />} />
             <Route path="/home" element={<Home />} />
             <Route path="/signup" element={<SignUp />} />
+
+            {/* Backend */}
             <Route path="/admin" element={<Login />} />
             <Route path="/userlist" element={<UserList />} />
             <Route path="/planlist" element={<PlanList />} />
             <Route path="/operatorlist" element={<OperatorList />} />
-            <Route path="/adminsignup" element={<Admin />} />
             <Route path="/addemployees" element={<AddEmployees />} />
             <Route path="/paidlist" element={<PaidList />} />
           </Routes>

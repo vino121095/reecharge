@@ -225,7 +225,7 @@ function AddEmployees() {
             </div>
             {modalShow && (
                 <div className="modal fade show" style={{ display: 'block' }} onClick={resetModal}>
-                    <div className="modal-dialog modal-lg" onClick={e => e.stopPropagation()}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered" onClick={e => e.stopPropagation()}>
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Edit Employee</h5>

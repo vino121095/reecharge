@@ -1,19 +1,19 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+ 
 const Home = () => {
-    const [selectedType, setSelectedType] = useState('');
+    const [selectedType, setSelectedType] = useState('prepaid');
     const [mobileNumber, setMobileNumber] = useState('');
     const [operator, setOperator] = useState('');
     const [operatorsList, setOperatorsList] = useState([]);
     const navigate = useNavigate();
-
+ 
     // Fetch operators when the component mounts
     useEffect(() => {
         const fetchOperators = async () => {
             try {
-                const response = await fetch("https://recharge.boonnet.co/api/operators");
+                const response = await fetch("http://localhost:8001/api/operators");
                 const data = await response.json();
                 if (response.ok) {
                     setOperatorsList(data);
@@ -24,44 +24,23 @@ const Home = () => {
                 console.error("Fetch Error:", error);
             }
         };
-
+ 
         fetchOperators();
     }, []);
-
-    const handleSubmit = async (e) => {
+ 
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const planType = selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
-
-        const data = {
-            plan_type: planType,
-            mobile_number: mobileNumber,
-            operator,
-        };
-
-        try {
-            const response = await fetch('https://recharge.boonnet.co/api/home_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const result = await response.json();
-            console.log('Success:', result);
-            navigate('/about', { state: { planType: selectedType, operator } });
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        // Navigate to the About page with selected planType and operator
+        navigate('/about', { state: { planType: selectedType, operator } });
     };
-
+    const handleLogout = () => {
+        // Example: Clear user session, local storage, etc.
+        localStorage.removeItem('userToken');  // Remove token or user data from localStorage
+        navigate('/');  // Redirect to login page (or homepage)
+    };
     return (
         <div className="container">
-            <div className="row justify-content-center text-align-center align-items-center vh-100">
+            <div className="row justify-content-center align-items-center vh-100">
                 <div className="col-md-5">
                     <div className="card" id="signcard">
                         <div className="card-header text-center">
@@ -70,7 +49,7 @@ const Home = () => {
                         <div className="card-body">
                             <form onSubmit={handleSubmit}>
                                 <div className="form-group">
-                                    <div className='d-flex gap-4'>
+                                    <div className="d-flex gap-4">
                                         <div className="form-check mt-2">
                                             <input
                                                 type="radio"
@@ -80,6 +59,7 @@ const Home = () => {
                                                 value="prepaid"
                                                 checked={selectedType === 'prepaid'}
                                                 onChange={(e) => setSelectedType(e.target.value)}
+                                               
                                             />
                                             <label className="form-check-label" htmlFor="prepaid">Prepaid</label>
                                         </div>
@@ -97,7 +77,7 @@ const Home = () => {
                                         </div>
                                     </div>
                                 </div>
-
+ 
                                 <div className="form-group mt-4">
                                     <label htmlFor="mobile-number">Mobile Number</label>
                                     <input
@@ -117,7 +97,7 @@ const Home = () => {
                                         }}
                                     />
                                 </div>
-
+ 
                                 <div className="form-group mt-4">
                                     <label htmlFor="operator">Select Operator</label>
                                     <select
@@ -127,18 +107,21 @@ const Home = () => {
                                         value={operator}
                                         onChange={(e) => setOperator(e.target.value)}
                                     >
-                                        <option value="" disabled selected>Select operator</option>
-                                        {operatorsList.map((operator, index) => (
-                                            <option key={index} value={operator.operator}>{operator.operator}</option>
+                                        <option value="" disabled>Select operator</option>
+                                        {operatorsList.map((op, index) => (
+                                            <option key={index} value={op.operator}>{op.operator}</option>
                                         ))}
                                     </select>
                                 </div>
-
+ 
                                 <button type="submit" className="btn btn-primary btn-block mt-4 w-100">Proceed</button>
                             </form>
                         </div>
-                        <div className="card-footer text-center">
+                        {/* <div className="card-footer text-center">
                             <p>Need assistance? <a href="#">Contact Us</a></p>
+                        </div> */}
+                        <div className="card-footer text-center">
+                            <p>Not you? <a href="#" onClick={handleLogout}>Log Out</a></p>
                         </div>
                     </div>
                 </div>
@@ -146,5 +129,6 @@ const Home = () => {
         </div>
     );
 }
-
+ 
 export default Home;
+ 

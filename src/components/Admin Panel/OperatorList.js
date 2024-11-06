@@ -21,7 +21,7 @@ function OperatorList() {
     useEffect(() => {
         // Fetch initial operators list from the API
         const fetchOperators = async () => {
-            const response = await axios.get('https://recharge.boonnet.co/api/operators');
+            const response = await axios.get('http://localhost:8001/api/operators');
             setOperatorsList(response.data);
         };
         fetchOperators();
@@ -54,7 +54,7 @@ function OperatorList() {
         formData.append('image', imageFile);
 
         try {
-            const response = await axios.post('https://recharge.boonnet.co/api/operators', formData, {
+            const response = await axios.post('http://localhost:8001/api/operators', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -75,7 +75,7 @@ function OperatorList() {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://recharge.boonnet.co/api/operators/${id}`);
+            await axios.delete(`http://localhost:8001/api/operators/${id}`);
             setOperatorsList(operatorsList.filter(op => op.oid !== id));
         } catch (error) {
             console.error("Error deleting operator:", error);
@@ -102,7 +102,7 @@ function OperatorList() {
         }
 
         try {
-            const response = await axios.put(`https://recharge.boonnet.co/api/operators/${currentOperator.oid}`, formData, {
+            const response = await axios.put(`http://localhost:8001/api/operators/${currentOperator.oid}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -126,13 +126,12 @@ function OperatorList() {
 
     // Search filter
     const filteredOperators = operatorsList.filter(op =>
-        op.operator.toLowerCase().includes(searchTerm.toLowerCase())
+        typeof op.operator === 'string' && op.operator.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     // Sorting
     const sortedOperators = filteredOperators.sort((a, b) => {
-        const aValue = a[sortConfig.key].toLowerCase();
-        const bValue = b[sortConfig.key].toLowerCase();
+        const aValue = typeof a[sortConfig.key] === 'string' ? a[sortConfig.key].toLowerCase() : '';
+        const bValue = typeof b[sortConfig.key] === 'string' ? b[sortConfig.key].toLowerCase() : '';
 
         if (aValue < bValue) {
             return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -142,6 +141,7 @@ function OperatorList() {
         }
         return 0;
     });
+
 
     // Pagination
     const totalItems = sortedOperators.length;
@@ -242,7 +242,7 @@ function OperatorList() {
                                             <td>
                                                 {op.image ? (
                                                     <img
-                                                        src={`https://recharge.boonnet.co/${op.image}`} // Adjust this path as needed
+                                                        src={`http://localhost:8001/${op.image}`} // Adjust this path as needed
                                                         alt="Logo"
                                                         style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                                     />
