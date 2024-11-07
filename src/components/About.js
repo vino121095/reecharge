@@ -20,7 +20,7 @@ const About = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:8001/api/add_category');
+                const response = await axios.get('https://recharge.boonnet.co/api/add_category');
                 console.log('Categories:', response.data); // Log the categories
                 setCategories(response.data.data || []);
             } catch (error) {
@@ -31,7 +31,7 @@ const About = () => {
  
         const fetchPlans = async () => {
             try {
-                const response = await axios.get('http://localhost:8001/api/plan_list');
+                const response = await axios.get('https://recharge.boonnet.co/api/plan_list');
                 console.log('Plans:', response.data); // Log the plans
                 setPlans(response.data.data || []);
             } catch (error) {

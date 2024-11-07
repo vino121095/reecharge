@@ -1,12 +1,16 @@
 const { Sequelize } = require('sequelize');
 const db = require('../config/db.js');
 const { DataTypes } = Sequelize;
- 
+
 const HomeData = db.define('HomeData', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
+    },
+    user_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     plan_type: {
         type: DataTypes.ENUM('Prepaid', 'Postpaid'),
@@ -28,6 +32,5 @@ const HomeData = db.define('HomeData', {
     tableName: 'home_data',
     timestamps: true,
 });
- 
+
 module.exports = HomeData;
- 

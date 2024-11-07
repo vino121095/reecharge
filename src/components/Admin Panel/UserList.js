@@ -22,7 +22,7 @@ function UserList() {
   useEffect(() => {
     const fetchOperators = async () => {
       try {
-        const response = await fetch('http://localhost:8001/api/home_data');
+        const response = await fetch('https://recharge.boonnet.co/api/home_data');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -35,7 +35,7 @@ function UserList() {
           operator: user.operator || '',
           createdAt: user.createdAt || '',
           updatedAt: user.updatedAt || '',
-          username: user.username || 'N/A', // Fallback to "N/A" if missing
+          user_name: user.user_name || '', // Fallback to "N/A" if missing
           price: user.price || 'N/A', // Fallback to "N/A" if missing
           status: user.status || 'Pending', // Fallback to "Pending" if missing
           type: user.type || 'Basic', // Fallback to "Basic" if missing
@@ -209,7 +209,7 @@ function UserList() {
                   )}
                 </th>
                 <th onClick={() => handleSort('username')} style={{ cursor: 'pointer' }}>
-                  Username
+                  Username 
                   {sortConfig.key === 'username' && (
                     <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
                   )}
@@ -233,12 +233,12 @@ function UserList() {
                 currentItems.map((user, index) => (
                   <tr key={user.id}>
                     <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                    <td>{user.username}</td>
+                    <td>{user.user_name}</td>
                     <td>{user.mobile_number}</td>
                     <td>{user.operator}</td>
                     <td>{user.plan_type}</td>
                     <td>{new Date(user.createdAt).toLocaleString()}</td>
-                    <td>{user.price}</td>
+                    <td>₹200</td>
                     <td>{user.status}</td>
  
                     <td>
@@ -358,7 +358,7 @@ function UserList() {
                   <button className="btn-close" onClick={handleCloseView}></button>
                 </div>
                 <div className="modal-body">
-                  <p><strong>Username:</strong> {viewUser.username}</p>
+                  <p><strong>Username:</strong> {viewUser.user_name}</p>
                   <p><strong>Phone Number:</strong> {viewUser.mobile_number}</p>
                   <p><strong>Operator:</strong> {viewUser.operator}</p>
                   <p><strong>Type:</strong> {viewUser.plan_type}</p>

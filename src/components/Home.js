@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
  
 const Home = () => {
     const [selectedType, setSelectedType] = useState('prepaid');
+    const [userName, setUserName] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [operator, setOperator] = useState('');
     const [operatorsList, setOperatorsList] = useState([]);
@@ -13,7 +14,7 @@ const Home = () => {
     useEffect(() => {
         const fetchOperators = async () => {
             try {
-                const response = await fetch("http://localhost:8001/api/operators");
+                const response = await fetch("https://recharge.boonnet.co/api/operators");
                 const data = await response.json();
                 if (response.ok) {
                     setOperatorsList(data);
@@ -28,11 +29,38 @@ const Home = () => {
         fetchOperators();
     }, []);
  
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => { // Add async here
         e.preventDefault();
-        // Navigate to the About page with selected planType and operator
-        navigate('/about', { state: { planType: selectedType, operator } });
+        const planType = selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
+    
+        const data = {
+            user_name: userName,
+            plan_type: planType,
+            mobile_number: mobileNumber,
+            operator,
+        };
+    
+        try {
+            const response = await fetch('https://recharge.boonnet.co/api/home_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const result = await response.json();
+            console.log('Success:', result);
+            navigate('/about', { state: { planType: selectedType, operator } });
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
+    
     const handleLogout = () => {
         // Example: Clear user session, local storage, etc.
         localStorage.removeItem('userToken');  // Remove token or user data from localStorage
@@ -76,6 +104,19 @@ const Home = () => {
                                             <label className="form-check-label" htmlFor="postpaid">Postpaid</label>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div className="form-group mt-4">
+                                    <label htmlFor="mobile-number">Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control mt-2"
+                                        id="name"
+                                        placeholder="Enter Your Name"
+                                        required
+                                        value={userName}
+                                        onChange={(e) => setUserName(e.target.value)}
+                                    />
                                 </div>
  
                                 <div className="form-group mt-4">

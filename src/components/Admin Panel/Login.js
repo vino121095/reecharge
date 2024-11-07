@@ -15,7 +15,7 @@ const Login = () => {
     e.preventDefault();
  
     // Select the appropriate endpoint based on user type
-    const endpoint = userType === "admin" ? 'http://localhost:8001/api/adminLogin' : 'http://localhost:8001/api/employees-login';
+    const endpoint = userType === "admin" ? 'https://recharge.boonnet.co/api/adminLogin' : 'https://recharge.boonnet.co/api/employees-login';
  
     try {
       const response = await fetch(endpoint, {
@@ -30,10 +30,15 @@ const Login = () => {
  
       if (response.ok) {
         console.log("Login successful:", data);
-        // Store user type or token if needed, e.g., in localStorage
-        localStorage.setItem('userType', userType); // Optional: store user type for session management
-        // Redirect based on user type
+ 
+        // Store user details in localStorage
+        localStorage.setItem('userType', userType);
+        localStorage.setItem('email', email); // Store email
+        localStorage.setItem('token', data.token || ''); // Store token (if available)
+ 
+        // Redirect to user dashboard based on userType
         navigate(userType === "admin" ? "/userlist" : "/userlist");
+ 
         // Clear input fields only after successful login
         setEmail("");
         setPassword("");
@@ -41,7 +46,6 @@ const Login = () => {
         console.log("Login Failed:", data);
         alert(data.msg || "Login failed"); // Provide user feedback
       }
- 
     } catch (error) {
       console.error("Error during login:", error);
       alert("An error occurred. Please try again.");
@@ -141,3 +145,6 @@ const Login = () => {
 }
  
 export default Login;
+ 
+ 
+ 
