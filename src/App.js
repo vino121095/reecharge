@@ -19,12 +19,12 @@ function App() {
         <div>
           <Routes>
             {/* Frontend */}
-            <Route path="/" element={<SignIn />} />
+            {/* <Route path="/" element={<SignIn />} /> */}
 
             <Route path="/about" element={<About />} />
             <Route path="/plandetail" element={<PlanDetail />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/" element={<Home />} />
+            {/* <Route path="/signup" element={<SignUp />} /> */}
 
             {/* Backend */}
             <Route path="/admin" element={<Login />} />
