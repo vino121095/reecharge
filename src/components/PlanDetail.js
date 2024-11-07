@@ -86,7 +86,7 @@ const PlanDetail = () => {
           {operatorData ? (
             <div className="text-center">
               <img
-                src={`https://recharge.boonnet.co/${operatorData.image}`} // Assuming the image URL is relative to the server root
+                src={`http://localhost:8001/${operatorData.image}`} // Assuming the image URL is relative to the server root
                 alt={operatorData.operator}
                 style={{ width: '100px', height: 'auto' }}
               />

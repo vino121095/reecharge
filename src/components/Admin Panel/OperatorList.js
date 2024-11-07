@@ -83,40 +83,62 @@ function OperatorList() {
     };
 
     const handleEdit = (op) => {
-        setCurrentOperator(op);
-        setModalImagePreview(op.image);
-        setModalShow(true);
+        setCurrentOperator(op); // Set the full operator object
+        setModalImagePreview(`http://localhost:8001/${op.image}`); // Display existing image in the modal
+        setModalShow(true); // Open the modal
     };
 
     const handleModalSubmit = async (e) => {
         e.preventDefault();
-        if (!currentOperator.operator.trim()) {
-            alert("Operator name cannot be empty!");
+    
+        // Validate the `operator` field
+        if (!currentOperator.operator || typeof currentOperator.operator !== 'string' || currentOperator.operator.trim() === '') {
+            alert("Operator name is required and must be a string!");
             return;
         }
-
-        const formData = new FormData();
-        formData.append('operator', currentOperator.operator);
-        if (modalImagePreview) {
-            formData.append('image', modalImagePreview);
+    
+        // Prepare data payload
+        const data = {
+            operator: currentOperator.operator,
+        };
+    
+        // Include the image file if present
+        if (imageFile) {
+            data.image = imageFile;
         }
-
+    
         try {
-            const response = await axios.put(`https://recharge.boonnet.co/api/operators/${currentOperator.oid}`, formData, {
+            // Using JSON payload instead of FormData
+            const response = await axios.put(`https://recharge.boonnet.co/api/operators/${currentOperator.oid}`, data, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                 },
             });
+    
+            // Update the operators list with the new data
             const updatedOperatorsList = operatorsList.map(op =>
                 op.oid === currentOperator.oid ? response.data : op
             );
-
             setOperatorsList(updatedOperatorsList);
-            handleModalClose();
+            handleModalClose(); // Close the modal after successful update
         } catch (error) {
-            console.error("Error updating operator:", error);
+            // Handle server errors
+            if (error.response) {
+                console.error("Error updating operator:", error.response.data);
+                alert(`Error: ${error.response.data.message || 'Could not update operator'}`);
+                
+                if (error.response.data.errors) {
+                    error.response.data.errors.forEach(err => {
+                        console.error(err.msg);
+                        alert(`Validation Error: ${err.msg}`);
+                    });
+                }
+            } else {
+                console.error("Error updating operator:", error);
+            }
         }
     };
+    
 
     const handleModalClose = () => {
         setModalShow(false);
@@ -242,7 +264,7 @@ function OperatorList() {
                                             <td>
                                                 {op.image ? (
                                                     <img
-                                                        src={`https://recharge.boonnet.co/${op.image}`} // Adjust this path as needed
+                                                        src={`http://localhost:8001/${op.image}`} // Adjust this path as needed
                                                         alt="Logo"
                                                         style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                                     />
