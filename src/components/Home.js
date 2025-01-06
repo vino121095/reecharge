@@ -9,6 +9,7 @@ const Home = () => {
     const [operator, setOperator] = useState('');
     const [operatorsList, setOperatorsList] = useState([]);
     const navigate = useNavigate();
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
  
     // Fetch operators when the component mounts
     useEffect(() => {
@@ -154,8 +155,22 @@ const Home = () => {
                                         ))}
                                     </select>
                                 </div>
+
+                                {/* Terms and Conditions */}
+                                <div className="form-check mt-4">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        id="terms"
+                                        checked={agreedToTerms}
+                                        onChange={() => setAgreedToTerms(!agreedToTerms)}
+                                    />
+                                    <label className="form-check-label" htmlFor="terms" required>
+                                        I agree to the <a href="https://merchant.razorpay.com/policy/PMdxchTtQAyFBU/terms" >Terms and Conditions</a> and <a href="https://merchant.razorpay.com/policy/PMdxchTtQAyFBU/refund" >Privacy Policy</a>.
+                                    </label>
+                                </div>
  
-                                <button type="submit" className="btn btn-primary btn-block mt-4 w-100">Proceed</button>
+                                <button type="submit" className="btn btn-primary btn-block mt-4 w-100" disabled={!agreedToTerms}>Proceed</button>
                             </form>
                         </div>
                         {/* <div className="card-footer text-center">
