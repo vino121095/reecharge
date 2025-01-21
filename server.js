@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const crypto = require('crypto');
-const sequelize = require('./config/db.js');
+const db = require('./config/db.js');
 const upload = require('./config/multerConfig.js');
 require('dotenv').config();
 const portfinder = require('portfinder');
@@ -15,6 +15,11 @@ app.use(cors());
 // const connectionString = 'mysql://glitztec_recharge_db:Tf8^I@^7Dbs=@185.189.27.48:3306/glitztec_recharge_db';
 // const hash = crypto.createHash('sha256').update(connectionString).digest('hex');
 // console.log(hash);
+
+(async () => {
+  await db.sync();
+  console.log('Table created successfully');
+})();
 
 app.use(
   session({

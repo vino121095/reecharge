@@ -157,16 +157,18 @@ const Home = () => {
                                 </div>
 
                                 {/* Terms and Conditions */}
-                                <div className="form-check mt-4">
+                                <div className="d-flex align-items-center mt-3" >
                                     <input
                                         type="checkbox"
                                         className="form-check-input"
                                         id="terms"
                                         checked={agreedToTerms}
                                         onChange={() => setAgreedToTerms(!agreedToTerms)}
+                                        style={{border: "1px solid #9f9f9f"}}
                                     />
                                     <label className="form-check-label" htmlFor="terms" required>
-                                        I agree to the <a href="https://merchant.razorpay.com/policy/PMdxchTtQAyFBU/terms" >Terms and Conditions</a> and <a href="https://merchant.razorpay.com/policy/PMdxchTtQAyFBU/refund" >Privacy Policy</a>.
+                                        I agree to the <a href="https://merchant.razorpay.com/policy/PMdxchTtQAyFBU/terms" >Terms and Conditions</a> , <a href="/privacy-policy" >Privacy Policy</a> and <a href="https://merchant.razorpay.com/policy/PMdxchTtQAyFBU/refund" >Cancellation and Refund Policy
+                                        </a>.
                                     </label>
                                 </div>
  
@@ -178,6 +180,7 @@ const Home = () => {
                         </div> */}
                         <div className="card-footer text-center">
                             <p>Not you? <a href="#" onClick={handleLogout}>Log Out</a></p>
+                            <p><a href="/contact" >Contact Us</a></p>
                         </div>
                     </div>
                 </div>

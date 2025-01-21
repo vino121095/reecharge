@@ -127,6 +127,7 @@ const PlanDetail = () => {
           >
             Pay Now
           </button>
+          <p style={{textAlign: "center"}}><a href="/contact" >Contact Us</a></p>
         </div>
       </div>
     </div>

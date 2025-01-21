@@ -165,6 +165,7 @@ const About = () => {
             ) : (
                 <p>No plans available for this category.</p>
             )}
+            <p style={{textAlign: "center"}}><a href="/contact" >Contact Us</a></p>
         </div>
     );
 };
