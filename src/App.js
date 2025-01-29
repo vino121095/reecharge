@@ -14,6 +14,8 @@ import AddEmployees from './components/Admin Panel/AddEmployees';
 import PaidList from './components/Admin Panel/PaidList';
 import ContactUs from './ContactUs';
 import PrivacyPolicy from './PrivacyPolicy';
+import AboutUs from './components/AboutUs';
+import Services from './components/Service';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
             {/* <Route path="/" element={<SignIn />} /> */}
 
             <Route path="/about" element={<About />} />
+            <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/service" element={<Services />} />
             <Route path="/plandetail" element={<PlanDetail />} />
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<ContactUs />} />

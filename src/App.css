@@ -225,7 +225,10 @@ border: 1px solid #e1e1e1;
   .nav-link{
     color: white !important;
     font-family: 'Nunito Sans', sans-serif !important;
+  }
 
+  .side-bar-link{
+    color: black !important;;
   }
   
   #signcard{
