@@ -16,7 +16,7 @@ const PlanDetail = () => {
     // Fetch operator data from API
     const fetchOperatorData = async () => {
       try {
-        const response = await axios.get('https://recharge.boonnet.co/api/operators');
+        const response = await axios.get('https://recharge.rbtamilan.in/api/operators');
         const operators = response.data; // Assuming response.data is an array of operators
        
         // Find the operator that matches the selected plan's operator

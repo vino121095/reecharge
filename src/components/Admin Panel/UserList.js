@@ -22,7 +22,7 @@ function UserList() {
   useEffect(() => {
     const fetchOperators = async () => {
       try {
-        const response = await fetch('https://recharge.boonnet.co/api/home_data');
+        const response = await fetch('https://recharge.rbtamilan.in/api/home_data');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

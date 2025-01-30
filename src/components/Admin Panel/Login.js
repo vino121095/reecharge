@@ -15,7 +15,7 @@ const Login = () => {
     e.preventDefault();
  
     // Select the appropriate endpoint based on user type
-    const endpoint = userType === "admin" ? 'https://recharge.boonnet.co/api/adminLogin' : 'https://recharge.boonnet.co/api/employees-login';
+    const endpoint = userType === "admin" ? 'https://recharge.rbtamilan.in/api/adminLogin' : 'https://recharge.rbtamilan.in/api/employees-login';
  
     try {
       const response = await fetch(endpoint, {

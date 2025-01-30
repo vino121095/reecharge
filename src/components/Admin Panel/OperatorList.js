@@ -21,7 +21,7 @@ function OperatorList() {
     useEffect(() => {
         // Fetch initial operators list from the API
         const fetchOperators = async () => {
-            const response = await axios.get('https://recharge.boonnet.co/api/operators');
+            const response = await axios.get('https://recharge.rbtamilan.in/api/operators');
             setOperatorsList(response.data);
         };
         fetchOperators();
@@ -54,7 +54,7 @@ function OperatorList() {
         formData.append('image', imageFile);
 
         try {
-            const response = await axios.post('https://recharge.boonnet.co/api/operators', formData, {
+            const response = await axios.post('https://recharge.rbtamilan.in/api/operators', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -75,7 +75,7 @@ function OperatorList() {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://recharge.boonnet.co/api/operators/${id}`);
+            await axios.delete(`https://recharge.rbtamilan.in/api/operators/${id}`);
             setOperatorsList(operatorsList.filter(op => op.oid !== id));
         } catch (error) {
             console.error("Error deleting operator:", error);
@@ -109,7 +109,7 @@ function OperatorList() {
     
         try {
             // Using JSON payload instead of FormData
-            const response = await axios.put(`https://recharge.boonnet.co/api/operators/${currentOperator.oid}`, data, {
+            const response = await axios.put(`https://recharge.rbtamilan.in/api/operators/${currentOperator.oid}`, data, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

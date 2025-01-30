@@ -47,7 +47,7 @@ function AddEmployees() {
         e.preventDefault();
         const employeeData = { name: employeeName, email, phone, password };
         try {
-            const response = await axios.post('https://recharge.boonnet.co/api/employees', employeeData);
+            const response = await axios.post('https://recharge.rbtamilan.in/api/employees', employeeData);
             alert('Employee Registration successful!');
             setEmployeeList(prevList => [...prevList, response.data]);
             resetForm();
@@ -58,7 +58,7 @@ function AddEmployees() {
 
     useEffect(() => {
         const fetchEmployees = async () => {
-            const response = await axios.get('https://recharge.boonnet.co/api/employees');
+            const response = await axios.get('https://recharge.rbtamilan.in/api/employees');
             setEmployeeList(response.data);
         };
         fetchEmployees();
@@ -66,7 +66,7 @@ function AddEmployees() {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://recharge.boonnet.co/api/employees/${id}`);
+            await axios.delete(`https://recharge.rbtamilan.in/api/employees/${id}`);
             setEmployeeList(employeeList.filter(emp => emp.eid !== id));
         } catch (error) {
             alert('Error deleting employee. Please try again.');
@@ -94,7 +94,7 @@ function AddEmployees() {
         };
 
         try {
-            const response = await axios.put(`https://recharge.boonnet.co/api/employees/${currentEmployee.eid}`, updatedData);
+            const response = await axios.put(`https://recharge.rbtamilan.in/api/employees/${currentEmployee.eid}`, updatedData);
             setEmployeeList(prevList => prevList.map(emp => (emp.eid === currentEmployee.eid ? response.data : emp)));
             resetModal();
         } catch (error) {

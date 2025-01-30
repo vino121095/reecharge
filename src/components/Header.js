@@ -31,7 +31,7 @@ function Header({ toggleSidebar }) {
     // Fetch employee details based on email
     const fetchEmployeeDetails = async (email, token) => {
         try {
-            const response = await fetch('https://recharge.boonnet.co/api/employees', {
+            const response = await fetch('https://recharge.rbtamilan.in/api/employees', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ function Header({ toggleSidebar }) {
     // Fetch admin details based on email
     const fetchAdminDetails = async (email, token) => {
         try {
-            const response = await fetch('https://recharge.boonnet.co/api/adminLogin', {
+            const response = await fetch('https://recharge.rbtamilan.in/api/adminLogin', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

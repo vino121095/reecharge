@@ -48,7 +48,7 @@ function SignUp() {
         };
    
         try {
-            const response = await fetch('https://recharge.boonnet.co/api/register', {
+            const response = await fetch('https://recharge.rbtamilan.in/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
