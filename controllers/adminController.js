@@ -2,6 +2,7 @@ const Admin = require('../models/admin'); // Make sure to point to your SQL mode
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Employee = require('../models/addEmployee');
 
 // Admin registration
 const admin = async (req, res) => {
@@ -90,14 +91,13 @@ const adminLogin = async (req, res) => {
         return res.status(200).json({
             success: true,
             msg: 'Login Successfully!',
-            accessToken,
+            token: accessToken,
             tokenType: 'Bearer',
-            data: {
-                email: adminData.email,
-                aid: adminData.aid,
-                createdAt: adminData.createdAt,
-                updatedAt: adminData.updatedAt,
-            },
+            userType: 'admin',
+            email: adminData.email,
+            employeeId: adminData.aid,
+            createdAt: adminData.createdAt,
+            updatedAt: adminData.updatedAt,
         });
 
     } catch (error) {
@@ -112,3 +112,20 @@ module.exports = {
     admin,
     adminLogin,
 };
+
+// exports.adminLogout = async (req, res) => {
+//     try {
+//         const { email } = req.body;
+        
+//         await Employee.update(
+//             {
+//                 is_active: false
+//             },
+//             { where: { email } }
+//         );
+
+//         res.status(200).json({ message: 'Logged out successfully' });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error during logout', error: error.toString() });
+//     }
+// };

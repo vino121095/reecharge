@@ -57,6 +57,18 @@ app.use('/api', homeDataRoutes);
 app.use('/api', addEmployeeRoutes);
 
 console.log('✅ Routes initialized successfully');
+console.log("Registered Routes:");
+app._router.stack.forEach((middleware) => {
+  if (middleware.route) {
+    console.log(`✔ Route: ${Object.keys(middleware.route.methods)} -> ${middleware.route.path}`);
+  } else if (middleware.name === 'router') {
+    middleware.handle.stack.forEach((subMiddleware) => {
+      if (subMiddleware.route) {
+        console.log(`✔ Sub-Route: ${Object.keys(subMiddleware.route.methods)} -> ${subMiddleware.route.path}`);
+      }
+    });
+  }
+});
 
 // Start the server using portfinder
 portfinder.getPortPromise()

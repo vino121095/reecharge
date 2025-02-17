@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import baseurl from '../../Api Service/ApiService';
  
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ const Login = () => {
     e.preventDefault();
  
     // Select the appropriate endpoint based on user type
-    const endpoint = userType === "admin" ? 'https://recharge.rbtamilan.in/api/adminLogin' : 'https://recharge.rbtamilan.in/api/employees-login';
+    const endpoint = userType === "admin" ? `${baseurl}/api/adminLogin` : `${baseurl}/api/employees-login`;
  
     try {
       const response = await fetch(endpoint, {
@@ -35,6 +36,7 @@ const Login = () => {
         localStorage.setItem('userType', userType);
         localStorage.setItem('email', email); // Store email
         localStorage.setItem('token', data.token || ''); // Store token (if available)
+        localStorage.setItem('employeeId', data.employeeId)
  
         // Redirect to user dashboard based on userType
         navigate(userType === "admin" ? "/userlist" : "/userlist");

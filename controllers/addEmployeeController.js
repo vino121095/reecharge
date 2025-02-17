@@ -117,11 +117,79 @@ exports.employeeLogin = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        // Generate a token for the employee
-        const token = jwt.sign({ eid: employee.eid, email: employee.email }, 'your_jwt_secret', { expiresIn: '1h' });
+        // Update login status and time
+        await Employee.update(
+            {
+                is_active: true,
+                last_loginat: new Date()
+            },
+            { where: { email: employee.email } }
+        );
 
-        res.status(200).json({ message: 'Login successful', token });
+        // Generate a token with additional user info
+        const token = jwt.sign(
+            { 
+                eid: employee.eid, 
+                email: employee.email,
+                role: employee.role 
+            }, 
+            'your_jwt_secret', 
+            { expiresIn: '1h' }
+        );
+
+        res.status(200).json({ 
+            message: 'Login successful', 
+            token,
+            userType: employee.role === 'admin' ? 'admin' : 'employee',
+            employeeId:employee.eid
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
+    }
+};
+
+exports.employeeLogout = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        await Employee.update(
+            {
+                is_active: false
+            },
+            { where: { email } }
+        );
+
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error during logout', error: error.toString() });
+    }
+};
+
+exports.getAllActiveEmployees = async (req, res) => {
+    try {
+        const activeEmployees = await Employee.findAll({
+            where: {
+                is_active: true
+            }
+        });
+        console.log("Active Employees:", activeEmployees);
+        
+        if (!activeEmployees.length) {
+            return res.status(404).json({ 
+                message: 'No active employees found',
+                data: []
+            });
+        }
+
+        res.status(200).json({
+            message: 'Active employees retrieved successfully',
+            data: activeEmployees
+        });
+    } catch (error) {
+        console.error("Error in getAllActiveEmployees:", error);
+        res.status(500).json({ 
+            message: 'Error fetching active employees', 
+            error: error.toString() 
+        });
     }
 };

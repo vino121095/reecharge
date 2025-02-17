@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import baseurl from '../Api Service/ApiService';
  
 function SignUp() {
     const [formData, setFormData] = useState({
@@ -48,7 +49,7 @@ function SignUp() {
         };
    
         try {
-            const response = await fetch('https://recharge.rbtamilan.in/api/register', {
+            const response = await fetch(`${baseurl}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

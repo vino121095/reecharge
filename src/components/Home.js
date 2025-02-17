@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState, useEffect } from 'react';
 import {Link, useNavigate } from 'react-router-dom';
+import baseurl from '../Api Service/ApiService';
 
 const Home = () => {
     const [selectedType, setSelectedType] = useState('prepaid');
@@ -16,7 +17,7 @@ const Home = () => {
     useEffect(() => {
         const fetchOperators = async () => {
             try {
-                const response = await fetch("https://recharge.rbtamilan.in/api/operators");
+                const response = await fetch(`${baseurl}/api/operators`);
                 const data = await response.json();
                 if (response.ok) {
                     setOperatorsList(data);
@@ -50,37 +51,44 @@ const Home = () => {
     };
     }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const planType = selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
+   // In Home.js handleSubmit function
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    const planType = selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
 
-        const data = {
-            user_name: userName,
-            plan_type: planType,
-            mobile_number: mobileNumber,
-            operator,
-        };
-
-        try {
-            const response = await fetch('https://recharge.rbtamilan.in/api/home_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const result = await response.json();
-            console.log('Success:', result);
-            navigate('/about', { state: { planType: selectedType, operator } });
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    const data = {
+        username: userName,
+        plan_type: planType,
+        mobile_number: mobileNumber,
+        payment_status: 'pending',
+        operator,
     };
+
+    try {
+        const response = await fetch(`${baseurl}/api/home_data`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        navigate('/about', { 
+            state: { 
+                planType: selectedType, 
+                operator,
+                homeDataId: result.id // Pass the home_data ID
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
 
     const toggleSubmenu = (menu) => {
         setActiveSubmenu(activeSubmenu === menu ? '' : menu);

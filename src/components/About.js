@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import baseurl from '../Api Service/ApiService';
  
 const About = () => {
     const [categories, setCategories] = useState([]);
@@ -14,13 +15,13 @@ const About = () => {
     const navigate = useNavigate();
     const location = useLocation();
  
-    const { operator, planType } = location.state || {}; // operator and planType passed from the home page
+    const { operator, planType, homeDataId } = location.state || {}; // operator and planType passed from the home page
  
     // Fetch categories and plans when the component mounts
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('https://recharge.rbtamilan.in/api/add_category');
+                const response = await axios.get(`${baseurl}/api/add_category`);
                 console.log('Categories:', response.data); // Log the categories
                 setCategories(response.data.data || []);
             } catch (error) {
@@ -31,7 +32,7 @@ const About = () => {
  
         const fetchPlans = async () => {
             try {
-                const response = await axios.get('https://recharge.rbtamilan.in/api/plan_list');
+                const response = await axios.get(`${baseurl}/api/plan_list`);
                 console.log('Plans:', response.data); // Log the plans
                 setPlans(response.data.data || []);
             } catch (error) {
@@ -94,7 +95,7 @@ const About = () => {
     };
  
     const handlePlanClick = (plan) => {
-        navigate('/plandetail', { state: { plan } });
+        navigate('/plandetail', { state: { plan, homeDataId } });
     };
  
     // Handle loading and error states

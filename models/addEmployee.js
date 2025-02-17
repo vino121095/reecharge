@@ -31,6 +31,14 @@ const Employee = db.define('Employee', {
     type: DataTypes.STRING,
     defaultValue: '0',
   },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  last_loginat: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   // resetToken: {
   //   type: DataTypes.STRING,
   //   allowNull: true,

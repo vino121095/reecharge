@@ -7,6 +7,9 @@ const {
 const {
     createHomeData,
     getAllHomeData,
+    updatePaymentInfo,
+    getAllPendingHomeData,
+    getAllPaidHomeData,
     getHomeDataById,
     updateHomeData,
     deleteHomeData,
@@ -17,6 +20,15 @@ router.post('/home_data', homeDataValidator, validate, createHomeData);
  
 // Get all HomeData entries
 router.get('/home_data', getAllHomeData);
+
+// In your routes file
+router.put('/home_data/payment/:id', updatePaymentInfo);
+
+// Get pending home data
+router.get('/home_data/pending', getAllPendingHomeData);
+
+// Get paid home data
+router.get('/home_data/paid', getAllPaidHomeData);
  
 // // Get HomeData by ID
 // router.get('/home_data/:id', getHomeDataById);

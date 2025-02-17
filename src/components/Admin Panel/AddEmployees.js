@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import AdminLayout from '../AdminLayout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import baseurl from '../../Api Service/ApiService';
 
 function AddEmployees() {
     const [employeeName, setEmployeeName] = useState('');
@@ -47,7 +48,7 @@ function AddEmployees() {
         e.preventDefault();
         const employeeData = { name: employeeName, email, phone, password };
         try {
-            const response = await axios.post('https://recharge.rbtamilan.in/api/employees', employeeData);
+            const response = await axios.post(`${baseurl}/api/employees`, employeeData);
             alert('Employee Registration successful!');
             setEmployeeList(prevList => [...prevList, response.data]);
             resetForm();
@@ -58,7 +59,7 @@ function AddEmployees() {
 
     useEffect(() => {
         const fetchEmployees = async () => {
-            const response = await axios.get('https://recharge.rbtamilan.in/api/employees');
+            const response = await axios.get(`${baseurl}/api/employees`);
             setEmployeeList(response.data);
         };
         fetchEmployees();
@@ -66,7 +67,7 @@ function AddEmployees() {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://recharge.rbtamilan.in/api/employees/${id}`);
+            await axios.delete(`${baseurl}/api/employees/${id}`);
             setEmployeeList(employeeList.filter(emp => emp.eid !== id));
         } catch (error) {
             alert('Error deleting employee. Please try again.');
@@ -94,7 +95,7 @@ function AddEmployees() {
         };
 
         try {
-            const response = await axios.put(`https://recharge.rbtamilan.in/api/employees/${currentEmployee.eid}`, updatedData);
+            const response = await axios.put(`${baseurl}/api/employees/${currentEmployee.eid}`, updatedData);
             setEmployeeList(prevList => prevList.map(emp => (emp.eid === currentEmployee.eid ? response.data : emp)));
             resetModal();
         } catch (error) {

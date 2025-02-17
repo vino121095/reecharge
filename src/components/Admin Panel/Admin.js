@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import baseurl from '../../Api Service/ApiService';
 
 function Admin() {
     const [formData, setFormData] = useState({
@@ -51,7 +52,7 @@ function Admin() {
         };
 
         try {
-            const response = await fetch('https://recharge.rbtamilan.in/api/admin', {
+            const response = await fetch(`${baseurl}/api/admin`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

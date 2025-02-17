@@ -1,16 +1,18 @@
 const HomeData = require('../models/homeData'); // Adjust path as needed
  
-// Create new HomeData entry
+
 const createHomeData = async (req, res) => {
     try {
-        const homeData = await HomeData.create(req.body);
+        const homeData = await HomeData.create({
+            ...req.body,
+            payment_status: 'pending' // Ensure status is always pending
+        });
         return res.status(201).json(homeData);
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
- 
-// Get all HomeData entries
+
 const getAllHomeData = async (req, res) => {
     try {
         const homeDataList = await HomeData.findAll();
@@ -19,6 +21,67 @@ const getAllHomeData = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+
+const updatePaymentInfo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { 
+            plan_id,
+            plan_name,
+            amount,
+            payment_status,
+            transaction_id 
+        } = req.body;
+
+        const [updated] = await HomeData.update({
+            plan_id,
+            plan_name,
+            amount,
+            payment_status,
+            payment_date: new Date(),
+            transaction_id
+        }, {
+            where: { id }
+        });
+
+        if (!updated) {
+            return res.status(404).json({ message: 'HomeData record not found' });
+        }
+
+        const updatedRecord = await HomeData.findByPk(id);
+        return res.status(200).json(updatedRecord);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+const getAllPendingHomeData = async (req, res) => {
+    try {
+        const homeDataList = await HomeData.findAll({
+            where: {
+                payment_status: 'pending'
+            }
+        });
+        return res.status(200).json(homeDataList);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+// Get all paid home data
+const getAllPaidHomeData = async (req, res) => {
+    try {
+        const homeDataList = await HomeData.findAll({
+            where: {
+                payment_status: 'paid'
+            }
+        });
+        return res.status(200).json(homeDataList);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
  
 // // Get HomeData by ID
 // const getHomeDataById = async (req, res) => {
@@ -67,6 +130,9 @@ const getAllHomeData = async (req, res) => {
 module.exports = {
     createHomeData,
     getAllHomeData,
+    updatePaymentInfo,
+    getAllPendingHomeData,
+    getAllPaidHomeData,
     // getHomeDataById,
     // updateHomeData,
     // deleteHomeData,
