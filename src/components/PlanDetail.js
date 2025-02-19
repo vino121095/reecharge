@@ -35,75 +35,156 @@ const PlanDetail = () => {
         fetchOperatorData();
     }, [plan?.operator]);
 
-    // ✅ Ensured function is defined before calling inside handlePayment
-    const updatePaymentStatus = async (status, transactionId = null) => {
+    const updatePaymentStatus = async (paymentDetails) => {
         if (!homeDataId) {
             console.error("homeDataId is missing!");
             return;
         }
 
         try {
+            // Create payment record in database
+            const paymentData = {
+                home_data_id: homeDataId,
+                plan_id: plan?.pid,
+                plan_name: plan?.plan_name,
+                amount: plan?.new_price,
+                payment_status: paymentDetails.status,
+                transaction_id: paymentDetails.razorpay_payment_id,
+                payment_method: paymentDetails.method || 'razorpay',
+                currency: 'INR',
+                payment_date: new Date().toISOString(),
+                customer_email: paymentDetails.email,
+                customer_contact: paymentDetails.contact,
+                operator: plan?.operator,
+                payment_response: JSON.stringify(paymentDetails)
+            };
+
+            // Send payment data to your backend
+            // await axios.post(`${baseurl}/api/payments`, paymentData);
+
+            // Update home_data payment status
             await axios.put(`${baseurl}/api/home_data/payment/${homeDataId}`, {
                 plan_id: plan?.pid,
                 plan_name: plan?.plan_name,
                 amount: plan?.new_price,
-                payment_status: status,
-                transaction_id: transactionId
+                payment_status: paymentDetails.status,
+                transaction_id: paymentDetails.razorpay_payment_id
             });
+
         } catch (error) {
-            console.error('Error updating payment status:', error);
-            setError('Failed to update payment status.');
-        } finally {
-            setLoading(false);
+            console.error('Error storing payment details:', error);
+            setError('Failed to store payment details.');
+            throw error; // Rethrow to handle in calling function
         }
     };
 
-    const handlePayment = () => {
-      if (!plan?.new_price) {
-          console.error("Plan details are missing!");
-          alert("Invalid plan details. Please try again.");
-          return;
-      }
-  
-      try {
-          setLoading(true);
-          const paystackPublicKey = 'pk_test_7fdd906bb13e7ac7c22ddead913085145672d515';
-  
-          const paystackHandler = window.PaystackPop.setup({
-              key: paystackPublicKey,
-              email: 'vijay.deecodes@gmail.com',
-              amount: plan.new_price * 100, // Convert to kobo
-              currency: 'GHS',
-              onClose: () => {
-                  setLoading(false);
-                  alert('Transaction was not completed, window closed.');
-                  updatePaymentStatus('failed');
-              },
-              callback: (response) => {
-                  try {
-                      console.log("Payment Response:", response);
-                      if (response && response.status === "success") {
-                         updatePaymentStatus('pending', response.reference);
-                          navigate('/');
-                      } else {
-                          alert('Payment verification failed!');
-                          updatePaymentStatus('failed');
-                      }
-                  } catch (error) {
-                      console.error("Error updating payment status:", error);
-                      alert("Something went wrong. Please contact support.");
-                  }
-              },
-          });
-  
-          paystackHandler.openIframe();
-      } catch (error) {
-          console.error("Error initializing payment:", error);
-          alert("An unexpected error occurred. Please try again.");
-          setLoading(false);
-      }
-  };
-  
+    const handlePayment = async () => {
+        if (!plan?.new_price) {
+            console.error("Plan details are missing!");
+            alert("Invalid plan details. Please try again.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Load Razorpay script dynamically
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            document.body.appendChild(script);
+
+            script.onload = () => {
+                const options = {
+                    key: 'rzp_test_a60jtifB0U4uQy',
+                    amount: plan.new_price * 100,
+                    currency: 'INR',
+                    name: 'Your Company Name',
+                    description: `Payment for ${plan.plan_name}`,
+                    handler: async function (response) {
+                        try {
+                            console.log("Payment Response:", response);
+                            // console.log(response.s)
+                            if (response.razorpay_payment_id) {
+                                // Prepare payment details
+                                const paymentDetails = {
+                                    status: 'paid',
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    method: 'razorpay',
+                                    email: options.prefill.email,
+                                    contact: options.prefill.contact,
+                                    amount: plan.new_price,
+                                    timestamp: new Date().toISOString()
+                                };
+
+                                // Store payment details
+                                await updatePaymentStatus(paymentDetails);
+                                alert('Payment successful!');
+                                navigate('/');
+                            } else {
+                                const failedPaymentDetails = {
+                                    status: 'failed',
+                                    razorpay_payment_id: null,
+                                    error_description: 'Payment verification failed',
+                                    email: options.prefill.email,
+                                    contact: options.prefill.contact,
+                                    timestamp: new Date().toISOString()
+                                };
+                                await updatePaymentStatus(failedPaymentDetails);
+                                alert('Payment verification failed!');
+                            }
+                        } catch (error) {
+                            console.error("Error processing payment:", error);
+                            alert("Something went wrong. Please contact support.");
+                        } finally {
+                            setLoading(false);
+                        }
+                    },
+                    prefill: {
+                        email: 'customer@example.com',
+                        contact: ''
+                    },
+                    theme: {
+                        color: '#3399cc'
+                    },
+                    modal: {
+                        ondismiss: async function () {
+                            try {
+                                const cancelledPaymentDetails = {
+                                    status: 'cancelled',
+                                    razorpay_payment_id: null,
+                                    error_description: 'Payment cancelled by user',
+                                    email: options.prefill.email,
+                                    contact: options.prefill.contact,
+                                    timestamp: new Date().toISOString()
+                                };
+                                await updatePaymentStatus(cancelledPaymentDetails);
+                            } catch (error) {
+                                console.error("Error updating cancelled payment:", error);
+                            } finally {
+                                setLoading(false);
+                                alert('Payment cancelled');
+                            }
+                        }
+                    }
+                };
+
+                const razorpayInstance = new window.Razorpay(options);
+                razorpayInstance.open();
+            };
+
+            script.onerror = () => {
+                setLoading(false);
+                alert('Failed to load payment gateway. Please try again.');
+            };
+
+        } catch (error) {
+            console.error("Error initializing payment:", error);
+            alert("An unexpected error occurred. Please try again.");
+            setLoading(false);
+        }
+    };
 
     if (!plan) {
         return <p>No plan details available.</p>;
@@ -133,7 +214,7 @@ const PlanDetail = () => {
                     {operatorData && (
                         <div className="text-center">
                             <img
-                                src={`${baseurl}/${operatorData.image}`}
+                                src={`http://localhost:3000/${operatorData.image}`}
                                 alt={operatorData.operator}
                                 style={{ width: '100px', height: 'auto' }}
                             />
