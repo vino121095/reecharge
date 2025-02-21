@@ -107,7 +107,7 @@ const PlanDetail = () => {
                             if (response.razorpay_payment_id) {
                                 // Prepare payment details
                                 const paymentDetails = {
-                                    status: 'paid',
+                                    status: 'pending',
                                     razorpay_payment_id: response.razorpay_payment_id,
                                     razorpay_order_id: response.razorpay_order_id,
                                     razorpay_signature: response.razorpay_signature,

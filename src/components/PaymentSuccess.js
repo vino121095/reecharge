@@ -137,12 +137,12 @@ const PaymentSuccess = () => {
                                     </div>
                                 </div>
 
-                                <div className="col-12">
+                                {/* <div className="col-12">
                                     <div className="d-flex justify-content-between align-items-center py-2">
                                         <span className="text-muted">Status</span>
                                         <span className='fw-bold'>{paymentData.payment_status}</span>
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div className="col-12">
                                     <div className="d-flex justify-content-between align-items-center py-2">
