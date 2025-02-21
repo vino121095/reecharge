@@ -120,8 +120,7 @@ const PlanDetail = () => {
 
                                 // Store payment details
                                 await updatePaymentStatus(paymentDetails);
-                                alert('Payment successful!');
-                                navigate('/');
+                                navigate(`/payment-success/${homeDataId}`);
                             } else {
                                 const failedPaymentDetails = {
                                     status: 'failed',

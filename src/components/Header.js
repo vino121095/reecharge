@@ -41,7 +41,7 @@ function Header({ toggleSidebar }) {
             });
  
             const data = await response.json();
-            console.log('Employee Data:', data);
+            console.log('Employee Data:');
  
             // If email matches the response, update the user name
             const user = data.find(user => user.email === email);

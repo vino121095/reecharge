@@ -83,18 +83,18 @@ const getAllPaidHomeData = async (req, res) => {
 };
 
  
-// // Get HomeData by ID
-// const getHomeDataById = async (req, res) => {
-//     try {
-//         const homeData = await HomeData.findByPk(req.params.id);
-//         if (!homeData) {
-//             return res.status(404).json({ message: 'HomeData not found' });
-//         }
-//         return res.status(200).json(homeData);
-//     } catch (error) {
-//         return res.status(500).json({ error: error.message });
-//     }
-// };
+// Get HomeData by ID
+const getHomeDataById = async (req, res) => {
+    try {
+        const homeData = await HomeData.findByPk(req.params.id);
+        if (!homeData) {
+            return res.status(404).json({ message: 'HomeData not found' });
+        }
+        return res.status(200).json(homeData);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
  
 // // Update HomeData entry
 // const updateHomeData = async (req, res) => {
@@ -133,7 +133,7 @@ module.exports = {
     updatePaymentInfo,
     getAllPendingHomeData,
     getAllPaidHomeData,
-    // getHomeDataById,
+    getHomeDataById,
     // updateHomeData,
     // deleteHomeData,
 };

@@ -17,16 +17,14 @@ const UserList = () => {
   const [viewUser, setViewUser] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
-  const [activeEmployees, setActiveEmployees] = useState([]);
   const [userRole, setUserRole] = useState('');
+
   const formatDateTime = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     
-    // Check if date is valid
     if (isNaN(date.getTime())) return dateString;
     
-    // Format date: DD-MM-YYYY HH:mm
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
@@ -40,18 +38,8 @@ const UserList = () => {
     try {
       const userRoleFromSession = localStorage.getItem('userType') || 'employee';
       const employeeIdFromSession = JSON.parse(localStorage.getItem('employeeId'));
-      console.log(" Retrieved from localStorage -> Role:", userRoleFromSession, "| Employee ID:", employeeIdFromSession);
       setUserRole(userRoleFromSession);
       setEmployeeId(employeeIdFromSession);
-
-       // Fetch active employees
-       console.log(" Fetching active employees...");
-       const activeEmployeesResponse = await fetch(`${baseurl}/api/active-employees`);
-       if (!activeEmployeesResponse.ok) throw new Error(" Failed to fetch active employees.");
-       const activeEmployeesData = await activeEmployeesResponse.json();
-       console.log(" Active Employees:", activeEmployeesData);
-
-       setActiveEmployees(activeEmployeesData.data);
 
       const response = await fetch(`${baseurl}/api/home_data/pending`);
       if (!response.ok) throw new Error('Network response was not ok');
@@ -67,56 +55,37 @@ const UserList = () => {
         user_name: user.user_name || '',
         status: user.payment_status || 'pending'
       }));
-       //  Recharge distribution logic for employees (No status check)
-       if (userRoleFromSession === 'employee') {
-        console.log(" Employee detected, distributing recharges...");
-        
-        if (sanitizedData.length >= 1) {
-          console.log(" Data size is sufficient for distribution.");
 
-          const employeeCount = activeEmployeesData.data.length;
-          const rechargesPerEmployee = Math.floor(sanitizedData.length / employeeCount);
-          console.log(`ℹ️ Total Employees: ${employeeCount}, Recharges per Employee: ${rechargesPerEmployee}`);
+      // Only apply recharge distribution logic for employees
+      if (userRoleFromSession === 'employee') {
+        try {
+          const activeEmployeesResponse = await fetch(`${baseurl}/api/active-employees`);
+          if (!activeEmployeesResponse.ok) throw new Error("Failed to fetch active employees.");
+          const activeEmployeesData = await activeEmployeesResponse.json();
 
-          const employeeId = employeeIdFromSession;
-          if (!employeeId) {
-              console.error(" Employee ID is missing or invalid.");
-              return;
+          if (sanitizedData.length >= 1) {
+            const employeeCount = activeEmployeesData.data.length;
+            const rechargesPerEmployee = Math.floor(sanitizedData.length / employeeCount);
+
+            const employeeIndex = activeEmployeesData.data.findIndex(emp => emp.eid === employeeIdFromSession);
+
+            if (employeeIndex !== -1) {
+              const startIndex = employeeIndex * rechargesPerEmployee;
+              let endIndex = startIndex + rechargesPerEmployee;
+
+              if (employeeIndex === employeeCount - 1) {
+                endIndex = sanitizedData.length;
+              }
+
+              sanitizedData = sanitizedData.slice(startIndex, endIndex);
+            }
           }
-
-          if (!activeEmployeesData || activeEmployeesData.length === 0) {
-              console.error(" No active employees found.");
-              return;
-          }
-
-          const employeeIndex = activeEmployeesData.data.findIndex(emp => emp.eid === employeeId);
-          console.log(`ℹ️ Employee Index: ${employeeIndex}`);
-
-          if (employeeIndex === -1) {
-              console.error(` Employee ID ${employeeId} not found in active employees list.`);
-              return;
-          }
-
-          const startIndex = employeeIndex * rechargesPerEmployee;
-          let endIndex = startIndex + rechargesPerEmployee;
-
-          // Ensure the last employee gets any remaining recharges
-          if (employeeIndex === employeeCount - 1) {
-            endIndex = sanitizedData.length;
-          }
-
-          console.log(` Assigning recharges -> Start: ${startIndex}, End: ${endIndex}`);
-
-          // Assign only the portion of recharges this employee is responsible for
-          sanitizedData = sanitizedData.slice(startIndex, endIndex);
-          console.log(" Assigned Recharge Data:", sanitizedData);
-        } else {
-          setOperators(sanitizedData);
-          console.log(" Not enough data to distribute.");
+        } catch (error) {
+          console.error("Error in employee data distribution:", error);
+          // Continue with full dataset if distribution fails
         }
-      } else {
-        console.log(" Admin detected, no data distribution needed.");
       }
+
       setOperators(sanitizedData);
       setLoading(false);
     } catch (error) {
@@ -132,6 +101,7 @@ const UserList = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Rest of your component code remains the same...
   const handleSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -169,7 +139,6 @@ const UserList = () => {
         throw new Error('Failed to update payment status');
       }
 
-      // Refresh the pending data
       await fetchPendingData();
       setEditModalShow(false);
     } catch (error) {
@@ -269,7 +238,7 @@ const UserList = () => {
                   value={itemsPerPage}
                   onChange={(e) => {
                     setItemsPerPage(Number(e.target.value));
-                    setCurrentPage(1); // Reset to first page when changing items per page
+                    setCurrentPage(1);
                   }}
                 >
                   <option value={5}>5 per page</option>
@@ -319,9 +288,7 @@ const UserList = () => {
                         <td>{user.plan_type}</td>
                         <td>{formatDateTime(user.payment_date)}</td>
                         <td>₹{user.amount}</td>
-                        <td>
-                            {user.status}
-                        </td>
+                        <td>{user.status}</td>
                         <td>
                           <button
                             className="btn btn-link p-0 me-2"
@@ -404,8 +371,7 @@ const UserList = () => {
                   <div className="mb-2"><strong>Type:</strong> {viewUser.plan_type}</div>
                   <div className="mb-2"><strong>Created At:</strong> {formatDateTime(viewUser.payment_date)}</div>
                   <div className="mb-2">
-                    <strong>Status:</strong>
-                      {viewUser.status}
+                    <strong>Status:</strong> {viewUser.status}
                   </div>
                 </div>
                 <div className="modal-footer">

@@ -30,8 +30,8 @@ router.get('/home_data/pending', getAllPendingHomeData);
 // Get paid home data
 router.get('/home_data/paid', getAllPaidHomeData);
  
-// // Get HomeData by ID
-// router.get('/home_data/:id', getHomeDataById);
+// Get HomeData by ID
+router.get('/home_data/:id', getHomeDataById);
  
 // // Update HomeData entry
 // router.put('/home_data/:id', homeDataValidator, validate, updateHomeData);

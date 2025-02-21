@@ -16,6 +16,7 @@ import ContactUs from './ContactUs';
 import PrivacyPolicy from './PrivacyPolicy';
 import AboutUs from './components/AboutUs';
 import Services from './components/Service';
+import PaymentSuccess from './components/PaymentSuccess';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/operatorlist" element={<OperatorList />} />
             <Route path="/addemployees" element={<AddEmployees />} />
             <Route path="/paidlist" element={<PaidList />} />
+            <Route path="/payment-success/:id" element={<PaymentSuccess />} />
           </Routes>
         </div>
       </div>
