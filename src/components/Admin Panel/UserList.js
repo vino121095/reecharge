@@ -18,6 +18,7 @@ const UserList = () => {
   const [newStatus, setNewStatus] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
   const [userRole, setUserRole] = useState('');
+  const [showRechargeOnly, setShowRechargeOnly] = useState(false);
 
   const formatDateTime = (dateString) => {
     if (!dateString) return '';
@@ -53,7 +54,8 @@ const UserList = () => {
         createdAt: user.createdAt || '',
         updatedAt: user.updatedAt || '',
         user_name: user.user_name || '',
-        status: user.payment_status || 'pending'
+        status: user.payment_status || 'pending',
+        hasPrice: user.amount && parseFloat(user.amount) > 0
       }));
 
       // Only apply recharge distribution logic for employees
@@ -167,25 +169,48 @@ const UserList = () => {
     setViewUser(null);
   };
 
+  const toggleRechargeDisplay = () => {
+    setShowRechargeOnly(!showRechargeOnly);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   // Filter and sort logic
   const filteredUsers = operators.filter((user) => {
+    // Text search filter
     const searchableFields = [
       user.operator,
       user.user_name,
       user.mobile_number
     ].map(field => (field || '').toLowerCase());
     
-    return searchableFields.some(field => 
+    const matchesSearch = searchableFields.some(field => 
       field.includes(searchTerm.toLowerCase())
     );
+    
+    // Price filter (only apply if toggle is ON)
+    const matchesPriceFilter = showRechargeOnly ? user.hasPrice : true;
+    
+    return matchesSearch && matchesPriceFilter;
   });
 
   const sortedUsers = filteredUsers.sort((a, b) => {
-    const aValue = a[sortConfig.key] || '';
-    const bValue = b[sortConfig.key] || '';
-    return sortConfig.direction === 'ascending' 
-      ? aValue > bValue ? 1 : -1 
-      : aValue < bValue ? 1 : -1;
+    if (sortConfig.key === 'payment_date') {
+      // Special handling for date sorting
+      const dateA = a.payment_date ? new Date(a.payment_date).getTime() : 0;
+      const dateB = b.payment_date ? new Date(b.payment_date).getTime() : 0;
+      
+      return sortConfig.direction === 'ascending' 
+        ? dateA - dateB
+        : dateB - dateA;
+    } else {
+      // Regular sorting for other fields
+      const aValue = a[sortConfig.key] || '';
+      const bValue = b[sortConfig.key] || '';
+      
+      return sortConfig.direction === 'ascending' 
+        ? aValue > bValue ? 1 : -1 
+        : aValue < bValue ? 1 : -1;
+    }
   });
 
   const totalItems = sortedUsers.length;
@@ -221,7 +246,7 @@ const UserList = () => {
             <h5 className="mb-0">User List {userRole === 'admin' ? '(Admin View)' : '(Employee View)'}</h5>
           </div>
           <div className="card-body">
-            {/* Search and Filter Controls */}
+            {/* Search, Filter Controls, and Toggle */}
             <div className="row mb-3">
               <div className="col-md-4">
                 <input
@@ -231,6 +256,20 @@ const UserList = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
+              </div>
+              <div className="col-md-3">
+                <div className="form-check form-switch">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="toggleRecharge"
+                    checked={showRechargeOnly}
+                    onChange={toggleRechargeDisplay}
+                  />
+                  <label className="form-check-label" htmlFor="toggleRecharge">
+                    {showRechargeOnly ? "Showing items with recharge price only" : "Showing all items"}
+                  </label>
+                </div>
               </div>
               <div className="col-md-2 ms-auto">
                 <select 
@@ -246,6 +285,20 @@ const UserList = () => {
                   <option value={20}>20 per page</option>
                   <option value={50}>50 per page</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Stats Summary */}
+            <div className="row mb-3">
+              <div className="col-md-12">
+                <div className="alert alert-info py-2">
+                  <div className="d-flex justify-content-between">
+                    <span><strong>Total Records:</strong> {operators.length}</span>
+                    {/* <span><strong>Filtered Records:</strong> {totalItems}</span> */}
+                    <span><strong>Records with Price:</strong> {operators.filter(op => op.hasPrice).length}</span>
+                    <span><strong>Records without Price:</strong> {operators.filter(op => !op.hasPrice).length}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -267,8 +320,16 @@ const UserList = () => {
                     <th>Phone Number</th>
                     <th>Operator</th>
                     <th>Type</th>
-                    <th>Date & Time</th>
-                    <th>Price</th>
+                    <th onClick={() => handleSort('payment_date')} style={{ cursor: 'pointer' }}>
+                      Date & Time {sortConfig.key === 'payment_date' && (
+                        <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
+                    <th onClick={() => handleSort('amount')} style={{ cursor: 'pointer' }}>
+                      Price {sortConfig.key === 'amount' && (
+                        <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -280,14 +341,14 @@ const UserList = () => {
                     </tr>
                   ) : (
                     currentItems.map((user, index) => (
-                      <tr key={user.id}>
+                      <tr key={user.id} className={user.hasPrice ? "" : "table-light"}>
                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td>{user.username}</td>
                         <td>{user.mobile_number}</td>
                         <td>{user.operator}</td>
                         <td>{user.plan_type}</td>
                         <td>{formatDateTime(user.payment_date)}</td>
-                        <td>₹{user.amount}</td>
+                        <td>{user.amount ? `₹${user.amount}` : "-"}</td>
                         <td>{user.status}</td>
                         <td>
                           <button
@@ -370,6 +431,7 @@ const UserList = () => {
                   <div className="mb-2"><strong>Operator:</strong> {viewUser.operator}</div>
                   <div className="mb-2"><strong>Type:</strong> {viewUser.plan_type}</div>
                   <div className="mb-2"><strong>Created At:</strong> {formatDateTime(viewUser.payment_date)}</div>
+                  <div className="mb-2"><strong>Price:</strong> {viewUser.amount ? `₹${viewUser.amount}` : "No price set"}</div>
                   <div className="mb-2">
                     <strong>Status:</strong> {viewUser.status}
                   </div>
@@ -384,7 +446,7 @@ const UserList = () => {
           </div>
         )}
 
-        {/* Edit Modal */}
+        {/* Edit Modal - Updated to include user details */}
         {editModalShow && currentUser && (
           <div className="modal show d-block" tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered">
@@ -394,14 +456,29 @@ const UserList = () => {
                   <button type="button" className="btn-close" onClick={() => setEditModalShow(false)}></button>
                 </div>
                 <div className="modal-body">
-                  <select
-                    className="form-select"
-                    value={newStatus}
-                    onChange={handleStatusChange}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                  </select>
+                  {/* User Details Section */}
+                  <div className="user-details mb-4 p-3 border rounded bg-light">
+                    <h6 className="border-bottom pb-2 mb-3">User Details</h6>
+                    <div className="mb-2"><strong>Username:</strong> {currentUser.username}</div>
+                    <div className="mb-2"><strong>Phone Number:</strong> {currentUser.mobile_number}</div>
+                    <div className="mb-2"><strong>Operator:</strong> {currentUser.operator}</div>
+                    <div className="mb-2"><strong>Type:</strong> {currentUser.plan_type}</div>
+                    <div className="mb-2"><strong>Created At:</strong> {formatDateTime(currentUser.payment_date)}</div>
+                    <div className="mb-2"><strong>Price:</strong> {currentUser.amount ? `₹${currentUser.amount}` : "No price set"}</div>
+                  </div>
+                  
+                  {/* Status Update Section */}
+                  <div className="mt-3">
+                    <label className="form-label fw-bold">Update Status:</label>
+                    <select
+                      className="form-select"
+                      value={newStatus}
+                      onChange={handleStatusChange}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="modal-footer">
                   <button 
@@ -412,7 +489,7 @@ const UserList = () => {
                     Close
                   </button>
                   <button 
-                    type="button" 
+                    type="button"
                     className="btn btn-primary" 
                     onClick={handleSaveEdit}
                     disabled={!newStatus}

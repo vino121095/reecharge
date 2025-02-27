@@ -27,11 +27,13 @@
     "portfinder": "^1.0.32",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
+    "react-datepicker": "^8.1.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "sequelize": "^6.37.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
