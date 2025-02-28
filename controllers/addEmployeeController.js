@@ -172,7 +172,7 @@ exports.getAllActiveEmployees = async (req, res) => {
                 is_active: true
             }
         });
-        console.log("Active Employees:", activeEmployees);
+        // console.log("Active Employees:", activeEmployees);
         
         if (!activeEmployees.length) {
             return res.status(404).json({ 

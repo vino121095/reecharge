@@ -17,6 +17,7 @@ import PrivacyPolicy from './PrivacyPolicy';
 import AboutUs from './components/AboutUs';
 import Services from './components/Service';
 import PaymentSuccess from './components/PaymentSuccess';
+import AddFeaturesForm from './components/Admin Panel/AddFeaturesForm'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="/addemployees" element={<AddEmployees />} />
             <Route path="/paidlist" element={<PaidList />} />
             <Route path="/payment-success/:id" element={<PaymentSuccess />} />
+            <Route path="/add-new-feature" element={<AddFeaturesForm />} />
           </Routes>
         </div>
       </div>

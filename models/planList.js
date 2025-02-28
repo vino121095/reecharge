@@ -45,8 +45,8 @@ const PlanList = db.define('PlanList', {
     allowNull: false,
   },
   extra_features: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.TEXT, 
+    allowNull: true, 
   },
   role: {
     type: DataTypes.STRING,
@@ -54,7 +54,7 @@ const PlanList = db.define('PlanList', {
   },
 }, {
   tableName: 'plan_list',
-  timestamps: true,
+  timestamps: true, 
 });
 
 module.exports = PlanList;

@@ -36,8 +36,8 @@ router.get('/home_data/:id', getHomeDataById);
 // // Update HomeData entry
 // router.put('/home_data/:id', homeDataValidator, validate, updateHomeData);
  
-// // Delete HomeData entry
-// router.delete('/home_data/:id', deleteHomeData);
+// Delete HomeData entry
+router.delete('/home_data/:id', deleteHomeData);
  
 module.exports = router;
  

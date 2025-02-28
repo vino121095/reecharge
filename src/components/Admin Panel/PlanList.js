@@ -253,7 +253,7 @@ const PlansList = () => {
                   <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
                 )}
               </th>
-              <th onClick={() => handleSort('cells')} style={{ cursor: 'pointer' }}>Cells
+              <th onClick={() => handleSort('cells')} style={{ cursor: 'pointer' }}>Calls
                 {sortConfig.key === 'cells' && (
                   <i className={`bi ${sortConfig.direction === 'ascending' ? 'bi-arrow-up' : 'bi-arrow-down'}`}></i>
                 )}
@@ -379,12 +379,55 @@ const AddPlanForm = ({
     validity: '',
     old_price: '',
     new_price: '',
-    extra_features: ''
+    extra_features: ''  // Changed to string to store comma-separated values
   });
- 
+  
+  // Features from API
+  const [features, setFeatures] = useState([]);
+  const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
+  
+  // State to track selected features
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  
+  // State to track dropdown visibility
+  const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+
+  // Fetch features when component mounts
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      setIsLoadingFeatures(true);
+      try {
+        const response = await axios.get(`${baseurl}/api/features`);
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setFeatures(response.data.data);
+        } else {
+          console.error("Expected an array of features but got:", response.data);
+          setFeatures([]);
+        }
+      } catch (error) {
+        console.error("Error fetching features:", error);
+        setFeatures([]);
+      } finally {
+        setIsLoadingFeatures(false);
+      }
+    };
+
+    fetchFeatures();
+  }, []);
+
   useEffect(() => {
     if (currentPlan) {
-      setFormData({ ...currentPlan });
+      // Parse extra_features string into array for checkboxes
+      const extraFeatures = currentPlan.extra_features 
+        ? currentPlan.extra_features.split(',').map(item => item.trim()) 
+        : [];
+      
+      setSelectedFeatures(extraFeatures);
+      
+      setFormData({ 
+        ...currentPlan,
+        extra_features: currentPlan.extra_features || ''
+      });
     } else {
       setFormData({
         operator: '',
@@ -398,6 +441,7 @@ const AddPlanForm = ({
         new_price: '',
         extra_features: ''
       });
+      setSelectedFeatures([]);
     }
   }, [currentPlan]);
  
@@ -408,6 +452,84 @@ const AddPlanForm = ({
       [name]: value
     });
   };
+  
+  // Handle checkbox change for extra features
+  const handleFeatureCheckboxChange = (feature) => {
+    setSelectedFeatures(prevSelected => {
+      const newSelected = prevSelected.includes(feature)
+        ? prevSelected.filter(item => item !== feature)
+        : [...prevSelected, feature];
+      
+      // Update formData with comma-separated string
+      setFormData({
+        ...formData,
+        extra_features: newSelected.join(', ')
+      });
+      
+      return newSelected;
+    });
+  };
+  
+  // Handle adding custom extra feature
+  const [newFeature, setNewFeature] = useState('');
+  
+  const handleAddFeature = async () => {
+    if (newFeature.trim()) {
+      try {
+        // First, upload a placeholder image for the new feature
+        const formData = new FormData();
+        
+        // Create a placeholder image (1x1 transparent pixel)
+        const base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        const blob = await fetch(`data:image/png;base64,${base64Data}`).then(res => res.blob());
+        const file = new File([blob], 'placeholder.png', { type: 'image/png' });
+        
+        formData.append('image', file);
+        formData.append('feature_name', newFeature.trim());
+        
+        const response = await axios.post(`${baseurl}/api/features`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data.success) {
+          // Add new feature to list
+          setFeatures([...features, response.data.data]);
+          
+          // Select the new feature
+          handleFeatureCheckboxChange(response.data.data.feature_name);
+          
+          // Clear input
+          setNewFeature('');
+        }
+      } catch (error) {
+        console.error('Error adding new feature:', error);
+        setError('Failed to add new feature. Please try again.');
+      }
+    }
+  };
+
+  // Toggle the dropdown visibility
+  const toggleFeaturesDropdown = () => {
+    setShowFeaturesDropdown(!showFeaturesDropdown);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const dropdown = document.getElementById('features-dropdown');
+      if (dropdown && !dropdown.contains(event.target) && 
+          !event.target.classList.contains('dropdown-toggle')) {
+        setShowFeaturesDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
  
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -474,18 +596,14 @@ const AddPlanForm = ({
                                         ))}
                                     </select>
               </div>
-              {/* <div className="mb-3">
-                <label className="form-label">Type:</label>
-                <input type="text" className="form-control" name="type" value={formData.type} onChange={handleChange} required />
-              </div> */}
               <div className="mb-3">
-  <label className="form-label">Type:</label>
-  <select className="form-select" name="type" value={formData.type} onChange={handleChange} required>
-    <option value="">Select Type</option>
-    <option value="Prepaid">Prepaid</option>
-    <option value="Postpaid">Postpaid</option>
-  </select>
-</div>
+                <label className="form-label">Type:</label>
+                <select className="form-select" name="type" value={formData.type} onChange={handleChange} required>
+                  <option value="">Select Type</option>
+                  <option value="Prepaid">Prepaid</option>
+                  <option value="Postpaid">Postpaid</option>
+                </select>
+              </div>
  
               <div className="mb-3">
                 <label className="form-label">Plan Name:</label>
@@ -520,13 +638,10 @@ const AddPlanForm = ({
               </div>
               </div>
          
- 
- 
-             
               <div className="col-md-6">
  
               <div className="mb-3">
-                <label className="form-label">Cells:</label>
+                <label className="form-label">Calls:</label>
                 <input type="text" className="form-control" name="cells" value={formData.cells} onChange={handleChange} required />
               </div>
               <div className="mb-3">
@@ -541,16 +656,84 @@ const AddPlanForm = ({
                 <label className="form-label">New Price:</label>
                 <input type="text" className="form-control" name="new_price" value={formData.new_price} onChange={handleChange} required />
               </div>
-              <div className="mb-3">
+
+              {/* Dropdown for extra features */}
+              <div className="mb-3 dropdown">
                 <label className="form-label">Extra Features:</label>
-                <textarea className="form-control" name="extra_features" value={formData.extra_features} onChange={handleChange}></textarea>
+                <div className="position-relative">
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center"
+                    onClick={toggleFeaturesDropdown}
+                  >
+                    <span style={{fontSize:'16px'}}>
+                      {selectedFeatures.length > 0 
+                        ? `${selectedFeatures.length} feature${selectedFeatures.length > 1 ? 's' : ''} selected` 
+                        : isLoadingFeatures ? 'Loading features...' : 'Select features'}
+                    </span>
+                    <span className="caret ms-2"></span>
+                  </button>
+                  
+                  {showFeaturesDropdown && (
+                    <div 
+                      id="features-dropdown"
+                      className="position-absolute w-100 border rounded bg-white shadow-sm py-2" 
+                      style={{ zIndex: 1000, maxHeight: '250px', overflowY: 'auto' }}
+                    >
+                      {isLoadingFeatures ? (
+                        <div className="text-center py-2">Loading features...</div>
+                      ) : features.length === 0 ? (
+                        <div className="text-center py-2">No features available</div>
+                      ) : (
+                        features.map((feature, index) => (
+                          <div className="px-3 py-1" key={index}>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id={`feature-${index}`}
+                                checked={selectedFeatures.includes(feature.feature_name)}
+                                onChange={() => handleFeatureCheckboxChange(feature.feature_name)}
+                              />
+                              <label className="form-check-label" htmlFor={`feature-${index}`}>
+                                {feature.feature_name}
+                              </label>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      
+                    </div>
+                  )}
+                </div>
+                
+                {/* Display selected features below dropdown */}
+                {selectedFeatures.length > 0 && (
+                  <div className="selected-features mt-2">
+                    <div className="d-flex flex-wrap gap-1">
+                      {selectedFeatures.map((feature, index) => (
+                        <span 
+                          key={index} 
+                          className="me-1 mb-1 "
+                        >
+                          {feature}
+                          <button 
+                            type="button" 
+                            className="btn-close btn-close-white ms-1" 
+                            style={{ fontSize: '10px' }}
+                            onClick={() => handleFeatureCheckboxChange(feature)}
+                          ></button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+
               <button type="submit" className="btn btn-primary">{currentPlan ? 'Update Plan' : 'Add Plan'}</button>
               </div>
        
               </div>
-         
-           
          
             </form>
          

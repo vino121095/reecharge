@@ -112,20 +112,20 @@ const getHomeDataById = async (req, res) => {
 //     }
 // };
  
-// // Delete HomeData entry
-// const deleteHomeData = async (req, res) => {
-//     try {
-//         const deleted = await HomeData.destroy({
-//             where: { id: req.params.id },
-//         });
-//         if (!deleted) {
-//             return res.status(404).json({ message: 'HomeData not found' });
-//         }
-//         return res.status(204).send();
-//     } catch (error) {
-//         return res.status(500).json({ error: error.message });
-//     }
-// };
+// Delete HomeData entry
+const deleteHomeData = async (req, res) => {
+    try {
+        const deleted = await HomeData.destroy({
+            where: { id: req.params.id },
+        });
+        if (!deleted) {
+            return res.status(404).json({ message: 'HomeData not found' });
+        }
+        return res.status(204).send();
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
  
 module.exports = {
     createHomeData,
@@ -135,6 +135,6 @@ module.exports = {
     getAllPaidHomeData,
     getHomeDataById,
     // updateHomeData,
-    // deleteHomeData,
+    deleteHomeData,
 };
  

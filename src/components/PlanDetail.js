@@ -8,6 +8,7 @@ const PlanDetail = () => {
     const navigate = useNavigate();
     const { plan, homeDataId } = location.state || {};
     const [operatorData, setOperatorData] = useState(null);
+    const [planFeatures, setPlanFeatures] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -34,6 +35,23 @@ const PlanDetail = () => {
 
         fetchOperatorData();
     }, [plan?.operator]);
+
+    useEffect(() => {
+        const fetchPlanFeatures = async () => {
+            try {
+                if (!plan?.pid) return;
+                
+                const response = await axios.get(`${baseurl}/api/plan-features/plan/${plan.pid}`);
+                if (response.data && response.data.data) {
+                    setPlanFeatures(response.data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching plan features:', error);
+            }
+        };
+
+        fetchPlanFeatures();
+    }, [plan?.pid]);
 
     const updatePaymentStatus = async (paymentDetails) => {
         if (!homeDataId) {
@@ -103,7 +121,6 @@ const PlanDetail = () => {
                     handler: async function (response) {
                         try {
                             console.log("Payment Response:", response);
-                            // console.log(response.s)
                             if (response.razorpay_payment_id) {
                                 // Prepare payment details
                                 const paymentDetails = {
@@ -185,6 +202,44 @@ const PlanDetail = () => {
         }
     };
 
+    // Fixed buildImageUrl function to correctly handle feature images
+    const buildImageUrl = (imagePath) => {
+        // If no path provided, return default image
+        if (!imagePath) {
+            return '/assets/icons/feature-default.png';
+        }
+        
+        // If path already starts with http or https, return as is
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            return imagePath;
+        }
+        
+        // If the path includes `/uploads/`, it's already a full path
+        if (imagePath.includes('/uploads/')) {
+            return `${baseurl}${imagePath}`;
+        }
+        
+        // Handle the case where only filename is provided (from the feature response)
+        // This is the key fix for feature images
+        if (!imagePath.startsWith('/')) {
+            return `${baseurl}/api/features/image/${imagePath}`;
+        }
+        
+        // For other API endpoint paths
+        const base = baseurl.endsWith('/') ? baseurl.slice(0, -1) : baseurl;
+        const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+        
+        return `${base}${path}`;
+    };
+
+    // Fix for image error handling
+    const handleImageError = (e, defaultImage) => {
+        if (!e.target.src.includes(defaultImage.split('/').pop())) {
+            e.target.src = defaultImage;
+            e.target.onerror = null; // Prevent further error handling if default image fails
+        }
+    };
+
     if (!plan) {
         return <p>No plan details available.</p>;
     }
@@ -213,9 +268,10 @@ const PlanDetail = () => {
                     {operatorData && (
                         <div className="text-center">
                             <img
-                                src={`http://localhost:3000/${operatorData.image}`}
+                                src={buildImageUrl(`/api/operators/image/${operatorData.oid}`)}
                                 alt={operatorData.operator}
                                 style={{ width: '100px', height: 'auto' }}
+                                onError={(e) => handleImageError(e, '/assets/icons/operator-default.png')}
                             />
                             <h5 className="mt-3">{operatorData.operator}</h5>
                         </div>
@@ -240,7 +296,30 @@ const PlanDetail = () => {
                     <div className="card mt-3">
                         <div className="card-body">
                             <h5>Extra Benefits:</h5>
-                            <p className="mb-2">{plan.extra_features}</p>
+                            {planFeatures.length > 0 ? (
+                                <div>
+                                    {planFeatures.map((feature, index) => (
+                                        <div key={index} className="d-flex align-items-center mb-2">
+                                            {feature.Feature?.image_path && (
+                                                <img 
+                                                    src={buildImageUrl(feature.Feature.image_path)} 
+                                                    alt={feature.Feature.feature_name || 'Feature'}
+                                                    style={{ 
+                                                        width: '24px', 
+                                                        height: '24px', 
+                                                        marginRight: '10px',
+                                                        objectFit: 'contain'
+                                                    }}
+                                                    onError={(e) => handleImageError(e, '/assets/icons/feature-default.png')}
+                                                />
+                                            )}
+                                            <span style={{fontSize: '16px'}}>{feature.Feature?.feature_name || 'Additional Feature'}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="mb-2">{plan.extra_features || 'No additional features'}</p>
+                            )}
                         </div>
                     </div>
 

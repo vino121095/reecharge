@@ -2,6 +2,8 @@ const Operator = require('../models/operator');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
 
 // Create an 
 const createOperator = async (req, res) => {
@@ -120,11 +122,40 @@ const deleteOperator = async (req, res) => {
     }
 };
 
+const getOperatorImage = async (req, res) => {
+    const operatorId = req.params.oid;
+    
+    try {
+        // Find the operator by ID
+        const operator = await Operator.findByPk(operatorId);
+        
+        if (!operator || !operator.image) {
+            return res.status(404).json({ message: 'Image not found' });
+        }
+        
+        // Get the full path to the image
+        const imagePath = path.resolve(operator.image);
+        
+        // Check if the file exists
+        if (fs.existsSync(imagePath)) {
+            // Send the file
+            return res.sendFile(imagePath);
+        } else {
+            return res.status(404).json({ message: 'Image file not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching operator image:', error);
+        return res.status(500).json({ message: 'Error fetching image', error: error.message });
+    }
+};
+
+
 
 module.exports = {
     createOperator,
     getOperators,
     getOperatorById,
     updateOperator,
-    deleteOperator
+    deleteOperator,
+    getOperatorImage
 }

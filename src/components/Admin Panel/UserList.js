@@ -19,6 +19,7 @@ const UserList = () => {
   const [employeeId, setEmployeeId] = useState(null);
   const [userRole, setUserRole] = useState('');
   const [showRechargeOnly, setShowRechargeOnly] = useState(false);
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
 
   const formatDateTime = (dateString) => {
     if (!dateString) return '';
@@ -151,10 +152,31 @@ const UserList = () => {
   const handleDelete = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
+        setDeleteInProgress(true);
+        
+        // Call the delete API endpoint
+        const response = await fetch(`${baseurl}/api/home_data/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to delete user. Status: ${response.status}`);
+        }
+
+        // Update the UI after successful deletion
         const updatedOperators = operators.filter(op => op.id !== userId);
         setOperators(updatedOperators);
+        
+        // Show success message
+        alert('User deleted successfully');
       } catch (error) {
         console.error('Error deleting user:', error);
+        alert(`Error deleting user: ${error.message}`);
+      } finally {
+        setDeleteInProgress(false);
       }
     }
   };
@@ -366,8 +388,12 @@ const UserList = () => {
                           <button
                             className="btn btn-link p-0"
                             onClick={() => handleDelete(user.id)}
+                            disabled={deleteInProgress}
                           >
                             <i className="bi bi-trash-fill text-danger"></i>
+                            {deleteInProgress && (
+                              <span className="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+                            )}
                           </button>
                         </td>
                       </tr>

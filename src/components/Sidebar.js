@@ -76,6 +76,12 @@ function Sidebar({ isOpen, toggleSidebar }) {
                             <li className={activeLink === '/addemployees' ? 'active-link' : ''}>Add Employees</li>
                         </Link>
                     )}
+                    {userType === 'admin' && (
+                       <Link to="/add-new-feature">
+                       <li className={activeLink === '/add-new-feature' ? 'active-link' : ''}>Add New Feature</li>
+                   </Link>
+                    )}
+                    
                 </ul>
             </div>
 

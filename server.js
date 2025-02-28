@@ -46,6 +46,8 @@ const planListRoutes = require('./routes/planListRoutes');
 const addCategoryRoutes = require('./routes/addCategoryRoutes');
 const homeDataRoutes = require('./routes/homeDataRoutes');
 const addEmployeeRoutes = require('./routes/addEmployeeRoutes');
+const featureRoutes = require('./routes/featureRoutes.js');
+const planFeatureRoutes = require('./routes/planFeatureRoutes');
 
 // Setup API routes
 app.use('/api', adminRoutes);
@@ -55,6 +57,8 @@ app.use('/api', planListRoutes);
 app.use('/api', addCategoryRoutes);
 app.use('/api', homeDataRoutes);
 app.use('/api', addEmployeeRoutes);
+app.use('/api', featureRoutes);
+app.use('/api/plan-features', planFeatureRoutes);
 
 console.log('✅ Routes initialized successfully');
 console.log("Registered Routes:");
