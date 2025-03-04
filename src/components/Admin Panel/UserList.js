@@ -20,6 +20,8 @@ const UserList = () => {
   const [userRole, setUserRole] = useState('');
   const [showRechargeOnly, setShowRechargeOnly] = useState(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [assignedToMe, setAssignedToMe] = useState(0);
 
   const formatDateTime = (dateString) => {
     if (!dateString) return '';
@@ -43,53 +45,64 @@ const UserList = () => {
       setUserRole(userRoleFromSession);
       setEmployeeId(employeeIdFromSession);
 
-      const response = await fetch(`${baseurl}/api/home_data/pending`);
+      let url;
+      
+      // Use different endpoints based on user role
+      if (userRoleFromSession === 'admin') {
+        // Admins see all pending records
+        url = `${baseurl}/api/home_data/pending`;
+      } else {
+        // Employees only see records assigned to them
+        url = `${baseurl}/api/home_data/getemployeedata/${Number(employeeIdFromSession)}`;
+      }
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
 
-      let sanitizedData = data.map(user => ({
+      // Process the data to handle null values and add flags
+      const processedData = data.map(user => ({
         ...user,
         plan_type: user.plan_type || '',
         mobile_number: user.mobile_number || '',
         operator: user.operator || '',
-        createdAt: user.createdAt || '',
-        updatedAt: user.updatedAt || '',
-        user_name: user.user_name || '',
+        payment_date: user.payment_date || '',
+        username: user.username || '',
         status: user.payment_status || 'pending',
         hasPrice: user.amount && parseFloat(user.amount) > 0
       }));
 
-      // Only apply recharge distribution logic for employees
+      setOperators(processedData);
+      setTotalRecords(data.length);
+      
+      // If employee role, count how many records are assigned to this employee
       if (userRoleFromSession === 'employee') {
+        setAssignedToMe(data.length);
+      } else if (userRoleFromSession === 'admin') {
+        // For admin, count records assigned to each employee
         try {
           const activeEmployeesResponse = await fetch(`${baseurl}/api/active-employees`);
-          if (!activeEmployeesResponse.ok) throw new Error("Failed to fetch active employees.");
-          const activeEmployeesData = await activeEmployeesResponse.json();
-
-          if (sanitizedData.length >= 1) {
-            const employeeCount = activeEmployeesData.data.length;
-            const rechargesPerEmployee = Math.floor(sanitizedData.length / employeeCount);
-
-            const employeeIndex = activeEmployeesData.data.findIndex(emp => emp.eid === employeeIdFromSession);
-
-            if (employeeIndex !== -1) {
-              const startIndex = employeeIndex * rechargesPerEmployee;
-              let endIndex = startIndex + rechargesPerEmployee;
-
-              if (employeeIndex === employeeCount - 1) {
-                endIndex = sanitizedData.length;
-              }
-
-              sanitizedData = sanitizedData.slice(startIndex, endIndex);
+          if (activeEmployeesResponse.ok) {
+            const activeEmployeesData = await activeEmployeesResponse.json();
+            
+            // If there are assigned records, show in console for admin visibility
+            if (activeEmployeesData.data && activeEmployeesData.data.length > 0) {
+              const assignmentCounts = {};
+              
+              data.forEach(record => {
+                if (record.emp_id) {
+                  assignmentCounts[record.emp_id] = (assignmentCounts[record.emp_id] || 0) + 1;
+                }
+              });
+              
+              console.log("Record distribution by employee:", assignmentCounts);
             }
           }
         } catch (error) {
-          console.error("Error in employee data distribution:", error);
-          // Continue with full dataset if distribution fails
+          console.error("Error fetching employee assignment data:", error);
         }
       }
 
-      setOperators(sanitizedData);
       setLoading(false);
     } catch (error) {
       console.error("Error Occurred:", error.message);
@@ -196,12 +209,45 @@ const UserList = () => {
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
+  const handleForceRedistribution = async () => {
+    // Only admins can force redistribution
+    if (userRole !== 'admin') return;
+    
+    if (window.confirm('Are you sure you want to redistribute all pending records among active employees?')) {
+      try {
+        setLoading(true);
+        
+        const response = await fetch(`${baseurl}/api/redistribute-pending`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to redistribute records');
+        }
+        
+        const result = await response.json();
+        alert(`Redistribution ${result.redistributed ? 'successful' : 'not needed'}. ${result.message}`);
+        
+        // Refresh data
+        await fetchPendingData();
+      } catch (error) {
+        console.error('Error during redistribution:', error);
+        alert(`Error: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   // Filter and sort logic
   const filteredUsers = operators.filter((user) => {
     // Text search filter
     const searchableFields = [
       user.operator,
-      user.user_name,
+      user.username,
       user.mobile_number
     ].map(field => (field || '').toLowerCase());
     
@@ -308,15 +354,20 @@ const UserList = () => {
                   <option value={50}>50 per page</option>
                 </select>
               </div>
+
+              
             </div>
 
             {/* Stats Summary */}
             <div className="row mb-3">
               <div className="col-md-12">
                 <div className="alert alert-info py-2">
-                  <div className="d-flex justify-content-between">
-                    <span><strong>Total Records:</strong> {operators.length}</span>
-                    {/* <span><strong>Filtered Records:</strong> {totalItems}</span> */}
+                  <div className="d-flex justify-content-between flex-wrap">
+                    <span><strong>Total Records:</strong> {totalRecords}</span>
+                    {userRole === 'employee' && (
+                      <span><strong>Assigned to Me:</strong> {assignedToMe}</span>
+                    )}
+                    <span><strong>Filtered Records:</strong> {totalItems}</span>
                     <span><strong>Records with Price:</strong> {operators.filter(op => op.hasPrice).length}</span>
                     <span><strong>Records without Price:</strong> {operators.filter(op => !op.hasPrice).length}</span>
                   </div>
@@ -334,19 +385,21 @@ const UserList = () => {
                         <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
                       )}
                     </th>
-                    <th onClick={() => handleSort('user_name')} style={{ cursor: 'pointer' }}>
-                      Username {sortConfig.key === 'user_name' && (
+                    <th onClick={() => handleSort('username')} style={{ cursor: 'pointer' }}>
+                      Username {sortConfig.key === 'username' && (
                         <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
                       )}
                     </th>
                     <th>Phone Number</th>
                     <th>Operator</th>
                     <th>Type</th>
+                    
                     <th onClick={() => handleSort('payment_date')} style={{ cursor: 'pointer' }}>
                       Date & Time {sortConfig.key === 'payment_date' && (
                         <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
                       )}
                     </th>
+                    <th>Old Price</th>
                     <th onClick={() => handleSort('amount')} style={{ cursor: 'pointer' }}>
                       Price {sortConfig.key === 'amount' && (
                         <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
@@ -370,6 +423,7 @@ const UserList = () => {
                         <td>{user.operator}</td>
                         <td>{user.plan_type}</td>
                         <td>{formatDateTime(user.payment_date)}</td>
+                        <td>{user.old_price ? `₹${user.old_price}` : "-"}</td>
                         <td>{user.amount ? `₹${user.amount}` : "-"}</td>
                         <td>{user.status}</td>
                         <td>
@@ -447,92 +501,139 @@ const UserList = () => {
           <div className="modal show d-block" tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">User Details</h5>
-                  <button type="button" className="btn-close" onClick={handleCloseView}></button>
-                </div>
-                <div className="modal-body">
-                  <div className="mb-2"><strong>Username:</strong> {viewUser.username}</div>
-                  <div className="mb-2"><strong>Phone Number:</strong> {viewUser.mobile_number}</div>
-                  <div className="mb-2"><strong>Operator:</strong> {viewUser.operator}</div>
-                  <div className="mb-2"><strong>Type:</strong> {viewUser.plan_type}</div>
-                  <div className="mb-2"><strong>Created At:</strong> {formatDateTime(viewUser.payment_date)}</div>
-                  <div className="mb-2"><strong>Price:</strong> {viewUser.amount ? `₹${viewUser.amount}` : "No price set"}</div>
-                  <div className="mb-2">
-                    <strong>Status:</strong> {viewUser.status}
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={handleCloseView}>
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+              // ... continuing from where the code was cut off
 
-        {/* Edit Modal - Updated to include user details */}
-        {editModalShow && currentUser && (
-          <div className="modal show d-block" tabIndex="-1">
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Edit Status</h5>
-                  <button type="button" className="btn-close" onClick={() => setEditModalShow(false)}></button>
-                </div>
-                <div className="modal-body">
-                  {/* User Details Section */}
-                  <div className="user-details mb-4 p-3 border rounded bg-light">
-                    <h6 className="border-bottom pb-2 mb-3">User Details</h6>
-                    <div className="mb-2"><strong>Username:</strong> {currentUser.username}</div>
-                    <div className="mb-2"><strong>Phone Number:</strong> {currentUser.mobile_number}</div>
-                    <div className="mb-2"><strong>Operator:</strong> {currentUser.operator}</div>
-                    <div className="mb-2"><strong>Type:</strong> {currentUser.plan_type}</div>
-                    <div className="mb-2"><strong>Created At:</strong> {formatDateTime(currentUser.payment_date)}</div>
-                    <div className="mb-2"><strong>Price:</strong> {currentUser.amount ? `₹${currentUser.amount}` : "No price set"}</div>
-                  </div>
-                  
-                  {/* Status Update Section */}
-                  <div className="mt-3">
-                    <label className="form-label fw-bold">Update Status:</label>
-                    <select
-                      className="form-select"
-                      value={newStatus}
-                      onChange={handleStatusChange}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="paid">Paid</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => setEditModalShow(false)}
-                  >
-                    Close
-                  </button>
-                  <button 
-                    type="button"
-                    className="btn btn-primary" 
-                    onClick={handleSaveEdit}
-                    disabled={!newStatus}
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+<div className="modal-header">
+  <h5 className="modal-title">User Details</h5>
+  <button type="button" className="btn-close" onClick={handleCloseView}></button>
+</div>
+<div className="modal-body">
+  <div className="table-responsive">
+    <table className="table table-bordered">
+      <tbody>
+        <tr>
+          <th>ID</th>
+          <td>{viewUser.id}</td>
+        </tr>
+        <tr>
+          <th>Username</th>
+          <td>{viewUser.username}</td>
+        </tr>
+        <tr>
+          <th>Mobile Number</th>
+          <td>{viewUser.mobile_number}</td>
+        </tr>
+        <tr>
+          <th>Operator</th>
+          <td>{viewUser.operator}</td>
+        </tr>
+        <tr>
+          <th>Plan Type</th>
+          <td>{viewUser.plan_type}</td>
+        </tr>
+        <tr>
+          <th>Amount</th>
+          <td>{viewUser.amount ? `₹${viewUser.amount}` : "-"}</td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>{viewUser.status}</td>
+        </tr>
+        <tr>
+          <th>Payment Date</th>
+          <td>{formatDateTime(viewUser.payment_date)}</td>
+        </tr>
+        {viewUser.emp_id && (
+          <tr>
+            <th>Assigned Employee</th>
+            <td>{viewUser.emp_id}</td>
+          </tr>
         )}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div className="modal-footer">
+  <button type="button" className="btn btn-secondary" onClick={handleCloseView}>
+    Close
+  </button>
+</div>
+</div>
+</div>
+</div>
+)}
 
-        {/* Modal Backdrop */}
-        {(showView || editModalShow) && <div className="modal-backdrop show"></div>}
-      </div>
-    </AdminLayout>
-  );
+{/* Edit Modal */}
+{editModalShow && currentUser && (
+<div className="modal show d-block" tabIndex="-1">
+<div className="modal-dialog modal-dialog-centered">
+<div className="modal-content">
+<div className="modal-header">
+  <h5 className="modal-title">Update Status</h5>
+  <button 
+    type="button" 
+    className="btn-close" 
+    onClick={() => setEditModalShow(false)}
+  ></button>
+</div>
+<div className="modal-body">
+  <div className="mb-3">
+    <label htmlFor="userDetails" className="form-label">User Details</label>
+    <div id="userDetails" className="form-text">
+      <strong>Username:</strong> {currentUser.username} <br />
+      <strong>Mobile:</strong> {currentUser.mobile_number} <br />
+      <strong>Operator:</strong> {currentUser.operator} <br />
+      <strong>Current Status:</strong> {currentUser.status}
+    </div>
+  </div>
+  <div className="mb-3">
+    <label htmlFor="statusSelect" className="form-label">New Status</label>
+    <select 
+      id="statusSelect" 
+      className="form-select" 
+      value={newStatus} 
+      onChange={handleStatusChange}
+    >
+      <option value="pending">Pending</option>
+      <option value="paid">paid</option>
+      
+    </select>
+  </div>
+</div>
+<div className="modal-footer">
+  <button 
+    type="button" 
+    className="btn btn-secondary" 
+    onClick={() => setEditModalShow(false)}
+  >
+    Cancel
+  </button>
+  <button 
+    type="button" 
+    className="btn btn-primary" 
+    onClick={handleSaveEdit}
+  >
+    Save Changes
+  </button>
+</div>
+</div>
+</div>
+</div>
+)}
+
+{/* Backdrop for modals */}
+{(showView || editModalShow) && (
+<div 
+className="modal-backdrop fade show" 
+onClick={() => {
+setShowView(false);
+setEditModalShow(false);
+}}
+></div>
+)}
+</div>
+</AdminLayout>
+);
 };
 
 export default UserList;

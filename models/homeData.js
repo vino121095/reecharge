@@ -36,6 +36,10 @@ const HomeData = sequelize.define('home_data', {
         type: DataTypes.STRING(255),
         allowNull: true
     },
+    old_price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
     amount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true
@@ -52,6 +56,10 @@ const HomeData = sequelize.define('home_data', {
     transaction_id: {
         type: DataTypes.STRING(255),
         allowNull: true
+    },
+    emp_id:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
     }
 }, {
     tableName: 'home_data',
@@ -65,6 +73,14 @@ HomeData.associate = (models) => {
         foreignKey: 'plan_id',
         as: 'plan'
     });
+    
+    // If you want to associate with an Employee model
+    if (models.Employee) {
+        HomeData.belongsTo(models.Employee, {
+            foreignKey: 'emp_id',
+            as: 'employee'
+        });
+    }
 };
 
 module.exports = HomeData;

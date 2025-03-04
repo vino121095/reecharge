@@ -13,5 +13,6 @@ router.delete('/employees/:id', addEmployeeController.deleteEmployee);
 //Employe Login
 router.post('/employees-login', addEmployeeController.employeeLogin);
 router.post('/employees-logout', addEmployeeController.employeeLogout);
+router.post('/redistribute-pending', addEmployeeController.redistributePendingRecords);
 
 module.exports = router;

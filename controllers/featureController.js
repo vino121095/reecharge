@@ -217,3 +217,48 @@ exports.serveStaticImage = (req, res) => {
     });
   }
 };
+<<<<<<< HEAD:controllers/featurecontroller.js
+
+exports.deleteFeature = async (req, res) => {
+  try {
+    // Find the feature first to get the image path
+    const feature = await Feature.findByPk(req.params.id);
+    
+    if (!feature) {
+      return res.status(404).json({
+        success: false,
+        error: 'Feature not found'
+      });
+    }
+
+    // Store the image path before deleting the database record
+    const imagePath = feature.image_path;
+    
+    // Delete the feature from database
+    await feature.destroy();
+    
+    // Delete the associated image file if it exists
+    if (imagePath) {
+      const fullPath = path.join('./uploads', imagePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      } else {
+        console.warn(`Image file not found during deletion: ${fullPath}`);
+      }
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Feature and associated image deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting feature:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server Error: ' + error.message
+    });
+  }
+};
+
+=======
+>>>>>>> c404e95c020e772633f8950aa135ce6d131bb94b:controllers/featureController.js

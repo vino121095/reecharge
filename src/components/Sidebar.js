@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import baseurl from '../Api Service/ApiService';
-
 function Sidebar({ isOpen, toggleSidebar }) {
     const location = useLocation();
     const activeLink = location.pathname;
     const userType = localStorage.getItem('userType');
     const email = localStorage.getItem('email');
     const navigate = useNavigate();
-
     const handleLogout = async () => {
         if(userType === 'employee'){
             try {
@@ -21,11 +19,9 @@ function Sidebar({ isOpen, toggleSidebar }) {
                     // Add any necessary credentials if required
                     // credentials: 'include'
                 });
-    
                 if (!response.ok) {
                     throw new Error('Logout failed');
                 }
-    
                 // Clear localStorage
                 localStorage.removeItem('userType');
                 // Clear any other stored data (tokens, etc.)
@@ -45,11 +41,8 @@ function Sidebar({ isOpen, toggleSidebar }) {
             localStorage.removeItem('email');
             localStorage.removeItem('employeeId');
             navigate('/admin');
-
         }
-        
     };
-
     return (
         <div className={`sidebar ${isOpen ? 'd-block' : 'd-none d-md-block'}`} id='newsidebar'>
             <div className='sidebarsize d-flex justify-content-between align-items-center'>
@@ -70,10 +63,14 @@ function Sidebar({ isOpen, toggleSidebar }) {
                     <Link to="/operatorlist">
                         <li className={activeLink === '/operatorlist' ? 'active-link' : ''}>Operators</li>
                     </Link>
-
                     {userType === 'admin' && (
                         <Link to="/addemployees">
                             <li className={activeLink === '/addemployees' ? 'active-link' : ''}>Add Employees</li>
+                        </Link>
+                    )}
+                    {userType === 'admin' && (
+                        <Link to="/employees-task">
+                            <li className={activeLink === '/employees-task' ? 'active-link' : ''}>Employees Task</li>
                         </Link>
                     )}
                     {userType === 'admin' && (
@@ -81,22 +78,18 @@ function Sidebar({ isOpen, toggleSidebar }) {
                        <li className={activeLink === '/add-new-feature' ? 'active-link' : ''}>Add New Feature</li>
                    </Link>
                     )}
-                    
                 </ul>
             </div>
-
             <div className="mt-auto">
                 <button className="btn btn-danger w-100" onClick={handleLogout}>Logout</button>
             </div>
-
             <style jsx>{`
                 .active-link {
-                    background-color: #0069d9;
+                    background-color: #0069D9;
                     color: white;
                 }
             `}</style>
         </div>
     );
 }
-
 export default Sidebar;

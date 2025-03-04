@@ -65,6 +65,7 @@ const PlanDetail = () => {
                 home_data_id: homeDataId,
                 plan_id: plan?.pid,
                 plan_name: plan?.plan_name,
+                old_price: plan?.old_price,
                 amount: plan?.new_price,
                 payment_status: paymentDetails.status,
                 transaction_id: paymentDetails.razorpay_payment_id,
@@ -85,6 +86,7 @@ const PlanDetail = () => {
                 plan_id: plan?.pid,
                 plan_name: plan?.plan_name,
                 amount: plan?.new_price,
+                old_price: plan?.old_price,
                 payment_status: paymentDetails.status,
                 transaction_id: paymentDetails.razorpay_payment_id
             });

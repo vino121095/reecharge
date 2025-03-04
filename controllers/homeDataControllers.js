@@ -28,6 +28,7 @@ const updatePaymentInfo = async (req, res) => {
         const { 
             plan_id,
             plan_name,
+            old_price,
             amount,
             payment_status,
             transaction_id 
@@ -36,6 +37,7 @@ const updatePaymentInfo = async (req, res) => {
         const [updated] = await HomeData.update({
             plan_id,
             plan_name,
+            old_price,
             amount,
             payment_status,
             payment_date: new Date(),
@@ -127,6 +129,57 @@ const deleteHomeData = async (req, res) => {
     }
 };
  
+const getEmployeePaidHomeData = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const homeDataList = await HomeData.findAll({
+            where: {
+                payment_status: 'paid',
+                emp_id: id
+            }
+        });
+        
+        return res.status(200).json(homeDataList);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+const getEmployeePendingHomeData = async (req, res) => {
+    try {
+        const {id} = req.params;
+        
+        const homeDataList = await HomeData.findAll({
+            where: {
+                payment_status: 'pending',
+                emp_id: id
+            }
+        });
+        // console.log(homeDataList);
+        return res.status(200).json(homeDataList);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+const getEmployeeAllHomeData = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const homeDataList = await HomeData.findAll({
+            where: {
+                emp_id: id
+            }
+        });
+        
+        return res.status(200).json(homeDataList);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+// Add these to your module.exports
 module.exports = {
     createHomeData,
     getAllHomeData,
@@ -136,5 +189,8 @@ module.exports = {
     getHomeDataById,
     // updateHomeData,
     deleteHomeData,
+    getEmployeePendingHomeData,
+    getEmployeePaidHomeData,    // Added
+    getEmployeeAllHomeData      // Added
 };
  

@@ -19,6 +19,8 @@ router.get('/features/image/:filename', featureController.getFeatureImage);
 // GET single feature by ID
 router.get('/features/:id', featureController.getFeatureById);
 
+router.delete('/features/:id', featureController.deleteFeature);
+
 // Add a static file route for direct access to uploads
 router.get('/uploads/*', featureController.serveStaticImage);
 

@@ -13,6 +13,8 @@ const FeatureUploadForm = () => {
   const [features, setFeatures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   // Fetch all features when component mounts
   useEffect(() => {
@@ -91,6 +93,32 @@ const FeatureUploadForm = () => {
       setMessage(`Error: ${error.response?.data?.error || 'Failed to upload feature'}`);
     } finally {
       setIsUploading(false);
+    }
+  };
+  
+  // Delete feature function
+  const handleDeleteFeature = async (featureId) => {
+    if (window.confirm('Are you sure you want to delete this feature? This action cannot be undone.')) {
+      setIsDeleting(true);
+      setDeleteId(featureId);
+      
+      try {
+        const response = await axios.delete(`${baseurl}/api/features/${featureId}`);
+        
+        if (response.data.success) {
+          setMessage('Feature deleted successfully!');
+          // Remove from the local state to avoid refetching
+          setFeatures(features.filter(feature => feature.f_id !== featureId));
+        } else {
+          setMessage(`Error: ${response.data.error || 'Failed to delete feature'}`);
+        }
+      } catch (error) {
+        console.error('Error deleting feature:', error);
+        setMessage(`Error: ${error.response?.data?.error || 'Failed to delete feature'}`);
+      } finally {
+        setIsDeleting(false);
+        setDeleteId(null);
+      }
     }
   };
   
@@ -230,6 +258,7 @@ const FeatureUploadForm = () => {
                           <th>ID</th>
                           <th>Feature Name</th>
                           <th>Image</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -248,6 +277,19 @@ const FeatureUploadForm = () => {
                                   e.target.src = 'https://via.placeholder.com/80x60?text=No+Image';
                                 }}
                               />
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => handleDeleteFeature(feature.f_id)}
+                                disabled={isDeleting && deleteId === feature.f_id}
+                              >
+                                {isDeleting && deleteId === feature.f_id ? (
+                                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                ) : (
+                                  <i className="bi bi-trash"></i>
+                                )} Delete
+                              </button>
                             </td>
                           </tr>
                         ))}

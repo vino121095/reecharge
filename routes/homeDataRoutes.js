@@ -13,6 +13,9 @@ const {
     getHomeDataById,
     updateHomeData,
     deleteHomeData,
+    getEmployeePendingHomeData,
+    getEmployeePaidHomeData,    // Added
+    getEmployeeAllHomeData      // Added
 } = require('../controllers/homeDataControllers');
  
 // Create new HomeData entry
@@ -38,6 +41,13 @@ router.get('/home_data/:id', getHomeDataById);
  
 // Delete HomeData entry
 router.delete('/home_data/:id', deleteHomeData);
+
+router.get('/home_data/getemployeedata/:id', getEmployeePendingHomeData);
+
+router.get('/home_data/employee/:id', getEmployeeAllHomeData);
+
+// Route to get paid home data for a specific employee
+router.get('/home_data/paid/employee/:id', getEmployeePaidHomeData);
  
 module.exports = router;
  
