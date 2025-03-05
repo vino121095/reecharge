@@ -502,7 +502,6 @@ const UserList = () => {
           <div className="modal show d-block" tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-              // ... continuing from where the code was cut off
 
 <div className="modal-header">
   <h5 className="modal-title">User Details</h5>
