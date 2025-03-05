@@ -217,7 +217,6 @@ exports.serveStaticImage = (req, res) => {
     });
   }
 };
-<<<<<<< HEAD:controllers/featurecontroller.js
 
 exports.deleteFeature = async (req, res) => {
   try {
@@ -259,6 +258,3 @@ exports.deleteFeature = async (req, res) => {
     });
   }
 };
-
-=======
->>>>>>> c404e95c020e772633f8950aa135ce6d131bb94b:controllers/featureController.js
