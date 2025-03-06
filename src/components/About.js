@@ -22,7 +22,7 @@ const About = () => {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get(`${baseurl}/api/add_category`);
-                console.log('Categories:', response.data); // Log the categories
+                // console.log('Categories:', response.data); // Log the categories
                 setCategories(response.data.data || []);
             } catch (error) {
                 setError("Error fetching categories.");
@@ -33,7 +33,7 @@ const About = () => {
         const fetchPlans = async () => {
             try {
                 const response = await axios.get(`${baseurl}/api/plan_list`);
-                console.log('Plans:', response.data); // Log the plans
+                // console.log('Plans:', response.data); // Log the plans
                 setPlans(response.data.data || []);
             } catch (error) {
                 setError("Error fetching plans.");
@@ -57,7 +57,7 @@ const About = () => {
                 return operatorMatch && planTypeMatch;
             });
  
-            console.log("Filtered Plans:", filteredPlans);  // Log filtered plans
+            // console.log("Filtered Plans:", filteredPlans);  // Log filtered plans
  
             // Group filtered plans by category
             const grouped = filteredPlans.reduce((acc, plan) => {
@@ -68,7 +68,7 @@ const About = () => {
                 return acc;
             }, {});
  
-            console.log("Grouped Plans by Category:", grouped);  // Log grouped plans
+            // console.log("Grouped Plans by Category:", grouped);  // Log grouped plans
             setGroupedPlans(grouped);  // Update grouped plans state
  
             // Set default category to show on initial render (first category in the list)

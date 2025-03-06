@@ -14,7 +14,7 @@ router.get('/operators', operatorController.getOperators);
 router.get('/operators/:id', operatorController.getOperatorById);
 
 // Get operator image by ID
-router.get('/operators/image/:oid', operatorController.getOperatorImage);
+router.get('/operators/image/:filename', operatorController.getOperatorImage);
 
 // Update an Operator by ID
 router.put('/operators/:id', validateOperator, operatorController.updateOperator);

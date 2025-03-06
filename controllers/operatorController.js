@@ -9,7 +9,7 @@ const fs = require('fs');
 const createOperator = async (req, res) => {
     try {
         // Check if the file was uploaded
-        const imagePath = req.file ? req.file.path : null;
+        const imagePath = req.file ? req.file.filename : null;
 
         // Create new operator with image path
         const newOperator = await Operator.create({
@@ -123,31 +123,31 @@ const deleteOperator = async (req, res) => {
 };
 
 const getOperatorImage = async (req, res) => {
-    const operatorId = req.params.oid;
-    
     try {
-        // Find the operator by ID
-        const operator = await Operator.findByPk(operatorId);
+        const imageFilename = req.params.filename;
         
-        if (!operator || !operator.image) {
-            return res.status(404).json({ message: 'Image not found' });
+        // Resolve full path to uploads directory
+        const uploadDir = path.resolve('./uploads');
+        const fullPath = path.join(uploadDir, imageFilename);
+        
+        // Check if file exists
+        if (!fs.existsSync(fullPath)) {
+            console.error(`Operator image file not found: ${fullPath}`);
+            return res.status(404).json({ message: 'Operator image file not found' });
         }
         
-        // Get the full path to the image
-        const imagePath = path.resolve(operator.image);
+        // Send the image file
+        return res.sendFile(fullPath);
         
-        // Check if the file exists
-        if (fs.existsSync(imagePath)) {
-            // Send the file
-            return res.sendFile(imagePath);
-        } else {
-            return res.status(404).json({ message: 'Image file not found' });
-        }
     } catch (error) {
-        console.error('Error fetching operator image:', error);
-        return res.status(500).json({ message: 'Error fetching image', error: error.message });
+        console.error("Error fetching operator image:", error);
+        return res.status(500).json({ 
+            message: 'Internal server error', 
+            error: error.message 
+        });
     }
 };
+
 
 
 

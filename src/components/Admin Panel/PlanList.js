@@ -103,7 +103,6 @@ const PlansList = () => {
       }
  
       const result = await response.json();
-      console.log('Success:', result);
       setSuccess('Plan added successfully!');
       setError(null);
     } catch (error) {

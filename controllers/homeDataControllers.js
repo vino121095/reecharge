@@ -1,10 +1,11 @@
 const HomeData = require('../models/homeData'); // Adjust path as needed
- 
+ const Employee = require('../models/addEmployee');
 
 const createHomeData = async (req, res) => {
     try {
         const homeData = await HomeData.create({
             ...req.body,
+            user_payment_datetime:new Date(),
             payment_status: 'pending' // Ensure status is always pending
         });
         return res.status(201).json(homeData);
@@ -76,7 +77,12 @@ const getAllPaidHomeData = async (req, res) => {
         const homeDataList = await HomeData.findAll({
             where: {
                 payment_status: 'paid'
-            }
+            },
+            include: [{
+                model: Employee,
+                as: 'employee', 
+                attributes: ['name', 'last_loginat', 'last_logoutat']
+            }]
         });
         return res.status(200).json(homeDataList);
     } catch (error) {
@@ -137,7 +143,12 @@ const getEmployeePaidHomeData = async (req, res) => {
             where: {
                 payment_status: 'paid',
                 emp_id: id
-            }
+            },
+            include: [{
+                model: Employee,
+                as: 'employee', 
+                attributes: ['name', 'last_loginat', 'last_logoutat']
+            }]
         });
         
         return res.status(200).json(homeDataList);
@@ -154,9 +165,14 @@ const getEmployeePendingHomeData = async (req, res) => {
             where: {
                 payment_status: 'pending',
                 emp_id: id
-            }
+            },
+            include: [{
+                model: Employee,
+                as: 'employee',
+                attributes: ['name', 'last_loginat', 'last_logoutat']
+            }]
         });
-        // console.log(homeDataList);
+
         return res.status(200).json(homeDataList);
     } catch (error) {
         return res.status(500).json({ error: error.message });
@@ -178,6 +194,7 @@ const getEmployeeAllHomeData = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+
 
 // Add these to your module.exports
 module.exports = {

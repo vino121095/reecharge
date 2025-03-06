@@ -84,9 +84,11 @@ function OperatorList() {
     };
 
     const handleEdit = (op) => {
-        setCurrentOperator(op); // Set the full operator object
-        setModalImagePreview(`http://localhost:8001/${op.image}`); // Display existing image in the modal
-        setModalShow(true); // Open the modal
+        setCurrentOperator(op);
+        // Use the getOperatorImage endpoint to fetch the image
+        const imageUrl = `${baseurl}/api/operators/image/${op.image}`;
+        setModalImagePreview(imageUrl);
+        setModalShow(true);
     };
 
     const handleModalSubmit = async (e) => {
@@ -145,6 +147,7 @@ function OperatorList() {
         setModalShow(false);
         setCurrentOperator(null);
         setModalImagePreview('');
+        setImageFile(null);
     };
 
     // Search filter
@@ -177,6 +180,10 @@ function OperatorList() {
             direction = 'descending';
         }
         setSortConfig({ key, direction });
+    };
+
+    const getImageUrl = (imageName) => {
+        return imageName ? `${baseurl}/api/operators/image/${imageName}` : null;
     };
 
     return (
@@ -263,14 +270,18 @@ function OperatorList() {
                                             <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                             <td>{op.operator}</td>
                                             <td>
-                                                {op.image ? (
-                                                    <img
-                                                        src={`http://localhost:8001/${op.image}`} // Adjust this path as needed
-                                                        alt="Logo"
-                                                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                                    />
+                                            {op.image ? (
+                                                <img
+                                                    src={getImageUrl(op.image)}
+                                                    alt="Logo"
+                                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null; 
+                                                        e.target.src = '/path/to/default/image.png'; // Optional: Add a default image
+                                                    }}
+                                                />
                                                 ) : (
-                                                    <span>No Logo Uploaded</span>
+                                                <span>No Logo Uploaded</span>
                                                 )}
                                             </td>
                                             <td>
@@ -340,16 +351,20 @@ function OperatorList() {
                                                 onChange={handleImageChange}
                                             />
                                             <div className="mt-3" style={{ width: '100px', height: '100px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                {modalImagePreview || currentOperator.image ? (
-                                                    <img
-                                                        src={modalImagePreview || currentOperator.image}
-                                                        alt="Preview"
-                                                        className="img-thumbnail"
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    />
-                                                ) : (
-                                                    <span style={{ color: '#888' }}>No Image Uploaded</span>
-                                                )}
+                                            {modalImagePreview || currentOperator.image ? (
+                                        <img
+                                            src={modalImagePreview || getImageUrl(currentOperator.image)}
+                                            alt="Preview"
+                                            className="img-thumbnail"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.src = '/path/to/default/image.png'; // Optional: Add a default image
+                                            }}
+                                        />
+                                    ) : (
+                                        <span style={{ color: '#888' }}>No Image Uploaded</span>
+                                    )}
                                             </div>
                                         </div>
                                         <div className="modal-footer">

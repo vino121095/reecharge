@@ -14,16 +14,30 @@ function PaidList() {
   const [userType, setUserType] = useState('');
   const [userId, setUserId] = useState('');
 
+  // Format date to match UserList format (DD-MM-YYYY HH:MM)
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    
+    if (isNaN(date.getTime())) return dateString;
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  };
+
   useEffect(() => {
     // Check user type and ID from local storage
     const checkUserType = () => {
       try {
-        const empid= localStorage.getItem('employeeId');
-        // Fix: Get userType directly from localStorage or userData
+        const empid = localStorage.getItem('employeeId');
         const type = localStorage.getItem('userType');
         const id = empid;
-        console.log('User type:', type);
-      console.log('User ID:', id);
+       
         setUserType(type);
         setUserId(id);
       } catch (error) {
@@ -87,9 +101,28 @@ function PaidList() {
     
     const sortableItems = [...paidList];
     sortableItems.sort((a, b) => {
-      if (sortConfig.key === 'payment_date') {
-        const dateA = new Date(a[sortConfig.key] || '');
-        const dateB = new Date(b[sortConfig.key] || '');
+      // Handle date fields consistently
+      if (sortConfig.key === 'payment_date' || 
+          sortConfig.key === 'user_payment_datetime' || 
+          sortConfig.key === 'last_loginat' || 
+          sortConfig.key === 'last_logoutat') {
+        
+        let dateA, dateB;
+        
+        if (sortConfig.key === 'last_loginat' || sortConfig.key === 'last_logoutat') {
+          // For employee fields, check if they exist
+          dateA = a.employee && a.employee[sortConfig.key] ? new Date(a.employee[sortConfig.key]) : new Date(0);
+          dateB = b.employee && b.employee[sortConfig.key] ? new Date(b.employee[sortConfig.key]) : new Date(0);
+        } else {
+          // For direct fields
+          dateA = new Date(a[sortConfig.key] || '');
+          dateB = new Date(b[sortConfig.key] || '');
+        }
+        
+        // Handle invalid dates
+        if (isNaN(dateA.getTime())) dateA = new Date(0);
+        if (isNaN(dateB.getTime())) dateB = new Date(0);
+        
         if (dateA < dateB) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -164,8 +197,11 @@ function PaidList() {
         'Operator': user.operator || '',
         'Type': user.plan_type || '',
         'Amount': user.amount || 0,
-        'Payment Date': user.payment_date ? new Date(user.payment_date).toLocaleString() : '',
-        'Status': user.payment_status || ''
+        'User Payment Date': user.user_payment_datetime ? formatDateTime(user.user_payment_datetime) : '',
+        'Employee Payment Date': user.payment_date ? formatDateTime(user.payment_date) : '',
+        'Status': user.payment_status || '',
+        'Last Login': user.employee?.last_loginat ? formatDateTime(user.employee.last_loginat) : '',
+        'Last Logout': user.employee?.last_logoutat ? formatDateTime(user.employee.last_logoutat) : ''
       }));
 
       // Convert to CSV
@@ -307,18 +343,27 @@ function PaidList() {
                     <th onClick={() => requestSort('amount')} style={{cursor: 'pointer'}}>
                       Amount {getSortIndicator('amount')}
                     </th>
+                    <th onClick={() => requestSort('user_payment_datetime')} style={{cursor: 'pointer'}}>
+                      User Payment Date {getSortIndicator('user_payment_datetime')}
+                    </th>
                     <th onClick={() => requestSort('payment_date')} style={{cursor: 'pointer'}}>
-                      Payment Date {getSortIndicator('payment_date')}
+                      Employee Payment Date {getSortIndicator('payment_date')}
                     </th>
                     <th onClick={() => requestSort('payment_status')} style={{cursor: 'pointer'}}>
                       Status {getSortIndicator('payment_status')}
+                    </th>
+                    <th onClick={() => requestSort('last_loginat')} style={{cursor: 'pointer'}}>
+                      Last Login {getSortIndicator('last_loginat')}
+                    </th>
+                    <th onClick={() => requestSort('last_logoutat')} style={{cursor: 'pointer'}}>
+                      Last Logout {getSortIndicator('last_logoutat')}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedData.length === 0 ? (
                     <tr>
-                      <td colSpan="8">No paid users found.</td>
+                      <td colSpan="11">No paid users found.</td>
                     </tr>
                   ) : (
                     sortedData.map((user, index) => (
@@ -329,9 +374,20 @@ function PaidList() {
                         <td>{user.operator || '-'}</td>
                         <td>{user.plan_type || '-'}</td>
                         <td>₹{user.amount || '0'}</td>
-                        <td>{user.payment_date ? new Date(user.payment_date).toLocaleString() : '-'}</td>
+                        <td>{formatDateTime(user.user_payment_datetime)}</td>
+                        <td>{formatDateTime(user.payment_date)}</td>
                         <td>
                           {user.payment_status || '-'}
+                        </td>
+                        <td>
+                          {user.employee?.last_loginat 
+                            ? formatDateTime(user.employee.last_loginat) 
+                            : '-'}
+                        </td>
+                        <td>
+                          {user.employee?.last_logoutat 
+                            ? formatDateTime(user.employee.last_logoutat) 
+                            : '-'}
                         </td>
                       </tr>
                     ))

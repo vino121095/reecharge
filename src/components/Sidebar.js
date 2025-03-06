@@ -15,19 +15,20 @@ function Sidebar({ isOpen, toggleSidebar }) {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({email})
-                    // Add any necessary credentials if required
-                    // credentials: 'include'
+                    body: JSON.stringify({
+                        email,
+                        logoutTime: new Date().toISOString() // Send current timestamp
+                    })
                 });
                 if (!response.ok) {
                     throw new Error('Logout failed');
                 }
                 // Clear localStorage
                 localStorage.removeItem('userType');
-                // Clear any other stored data (tokens, etc.)
-                localStorage.removeItem('token'); // If you're storing a token
+                localStorage.removeItem('token');
                 localStorage.removeItem('email');
-            localStorage.removeItem('employeeId');
+                localStorage.removeItem('employeeId');
+                localStorage.removeItem('loginTime');
                 // Redirect to login page
                 navigate('/admin');
             } catch (error) {

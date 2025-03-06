@@ -53,6 +53,10 @@ const HomeData = sequelize.define('home_data', {
         type: DataTypes.DATE,
         allowNull: true
     },
+    user_payment_datetime: {  // New column added
+        type: DataTypes.DATE,
+        allowNull: true
+    },
     transaction_id: {
         type: DataTypes.STRING(255),
         allowNull: true
@@ -60,7 +64,7 @@ const HomeData = sequelize.define('home_data', {
     emp_id:{
         type: DataTypes.INTEGER,
         allowNull: true,
-    }
+    },
 }, {
     tableName: 'home_data',
     timestamps: false,

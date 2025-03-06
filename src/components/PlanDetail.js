@@ -72,6 +72,7 @@ const PlanDetail = () => {
                 payment_method: paymentDetails.method || 'razorpay',
                 currency: 'INR',
                 payment_date: new Date().toISOString(),
+                user_payment_datetime: new Date().toISOString(),
                 customer_email: paymentDetails.email,
                 customer_contact: paymentDetails.contact,
                 operator: plan?.operator,
@@ -88,7 +89,7 @@ const PlanDetail = () => {
                 amount: plan?.new_price,
                 old_price: plan?.old_price,
                 payment_status: paymentDetails.status,
-                transaction_id: paymentDetails.razorpay_payment_id
+                transaction_id: paymentDetails.razorpay_payment_id,
             });
 
         } catch (error) {
@@ -134,7 +135,8 @@ const PlanDetail = () => {
                                     email: options.prefill.email,
                                     contact: options.prefill.contact,
                                     amount: plan.new_price,
-                                    timestamp: new Date().toISOString()
+                                    timestamp: new Date().toISOString(),
+                                    user_payment_datetime: new Date().toISOString()
                                 };
 
                                 // Store payment details
@@ -147,7 +149,8 @@ const PlanDetail = () => {
                                     error_description: 'Payment verification failed',
                                     email: options.prefill.email,
                                     contact: options.prefill.contact,
-                                    timestamp: new Date().toISOString()
+                                    timestamp: new Date().toISOString(),
+                                    user_payment_datetime: new Date().toISOString()
                                 };
                                 await updatePaymentStatus(failedPaymentDetails);
                                 alert('Payment verification failed!');
@@ -175,7 +178,8 @@ const PlanDetail = () => {
                                     error_description: 'Payment cancelled by user',
                                     email: options.prefill.email,
                                     contact: options.prefill.contact,
-                                    timestamp: new Date().toISOString()
+                                    timestamp: new Date().toISOString(),
+                                    user_payment_datetime: new Date().toISOString()
                                 };
                                 await updatePaymentStatus(cancelledPaymentDetails);
                             } catch (error) {
@@ -204,6 +208,12 @@ const PlanDetail = () => {
         }
     };
 
+    const getImageUrl = (filename) => {
+        if (!filename) {
+            return '/assets/icons/operator-default.png';
+        }
+        return `${baseurl}/api/operators/image/${filename}`;
+    };
     // Fixed buildImageUrl function to correctly handle feature images
     const buildImageUrl = (imagePath) => {
         // If no path provided, return default image
@@ -270,10 +280,13 @@ const PlanDetail = () => {
                     {operatorData && (
                         <div className="text-center">
                             <img
-                                src={buildImageUrl(`/api/operators/image/${operatorData.oid}`)}
+                                src={getImageUrl(operatorData.image)}
                                 alt={operatorData.operator}
                                 style={{ width: '100px', height: 'auto' }}
-                                onError={(e) => handleImageError(e, '/assets/icons/operator-default.png')}
+                                onError={(e) => {
+                                    e.target.src = '/assets/icons/operator-default.png';
+                                    e.target.onerror = null;
+                                }}
                             />
                             <h5 className="mt-3">{operatorData.operator}</h5>
                         </div>

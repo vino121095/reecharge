@@ -39,6 +39,10 @@ const Employee = db.define('Employee', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  last_logoutat: { 
+    type: DataTypes.DATE,
+    allowNull: true,
+  }
   // resetToken: {
   //   type: DataTypes.STRING,
   //   allowNull: true,
@@ -47,10 +51,18 @@ const Employee = db.define('Employee', {
   //   type: DataTypes.DATE,
   //   allowNull: true,
   // },
-}, {
+}, 
+{
   tableName: 'add_employee',
   timestamps: true,
 });
+
+Employee.associate = (models) => {
+  Employee.hasMany(models.HomeData, {
+    foreignKey: 'eid',
+    as: 'homeData'
+  });
+};
  
 module.exports = Employee;
  

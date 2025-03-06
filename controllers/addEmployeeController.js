@@ -129,7 +129,10 @@ exports.employeeLogin = async (req, res) => {
         // DISTRIBUTION LOGIC
         // First, reset all pending records to unassigned state
         await HomeData.update(
-            { emp_id: null },
+            { 
+                emp_id: null,
+                last_loginat:new Date()
+            },
             { 
                 where: { payment_status: 'pending' }
             }
@@ -218,18 +221,22 @@ exports.employeeLogout = async (req, res) => {
             return res.status(404).json({ message: 'Employee not found' });
         }
         
-        // Update employee status to inactive
+        // Update employee status and logout time
         await Employee.update(
             {
-                is_active: false
+                is_active: false,
+                last_logoutat: new Date() // Store current timestamp
             },
             { where: { email } }
         );
 
-        // REDISTRIBUTION LOGIC
+        // REDISTRIBUTION LOGIC (Same as previous implementation)
         // First, clear records assigned to this employee
         await HomeData.update(
-            { emp_id: null },
+            { 
+                emp_id: null,
+                last_logoutat:new Date()
+            },
             { 
                 where: { 
                     payment_status: 'pending',
@@ -295,7 +302,10 @@ exports.employeeLogout = async (req, res) => {
             }
         }
 
-        res.status(200).json({ message: 'Logged out successfully' });
+        res.status(200).json({ 
+            message: 'Logged out successfully',
+            logoutTime: new Date().toISOString()
+        });
     } catch (error) {
         console.error('Logout error:', error);
         res.status(500).json({ message: 'Error during logout', error: error.toString() });

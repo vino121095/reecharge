@@ -13,6 +13,7 @@ const EmployeesTask = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showDateRange, setShowDateRange] = useState(false);
+  const [employeeLoginDetails, setEmployeeLoginDetails] = useState({});
 
   // Fetch active employees
   useEffect(() => {
@@ -59,6 +60,17 @@ const EmployeesTask = () => {
         
         const data = await response.json();
         
+        // Extract login/logout information from first task (if available)
+        if (data.length > 0 && data[0].employee) {
+          setEmployeeLoginDetails({
+            [selectedEmployee]: {
+              lastLogin: data[0].employee.last_loginat,
+              lastLogout: data[0].employee.last_logoutat,
+              name: data[0].employee.name
+            }
+          });
+        }
+        
         // Update the tasks for this employee
         setEmployeeTasks(prev => ({
           ...prev,
@@ -99,6 +111,18 @@ const EmployeesTask = () => {
           const paidResponse = await fetch(`${baseurl}/api/home_data/paid/employee/${employee.eid}`);
           if (!paidResponse.ok) throw new Error(`Failed to fetch paid tasks for ${employee.name}`);
           const paidData = await paidResponse.json();
+          
+          // Extract login/logout info if available
+          if (pendingData.length > 0 && pendingData[0].employee) {
+            setEmployeeLoginDetails(prev => ({
+              ...prev,
+              [employee.eid]: {
+                lastLogin: pendingData[0].employee.last_loginat,
+                lastLogout: pendingData[0].employee.last_logoutat,
+                name: pendingData[0].employee.name
+              }
+            }));
+          }
           
           return {
             employeeId: employee.eid,
@@ -187,6 +211,8 @@ const EmployeesTask = () => {
       'Type': task.plan_type,
       'Amount': task.amount || '0',
       'Date': formatDateTime(viewMode === 'assigned' ? task.createdAt : task.payment_date),
+      'Last Login': formatDateTime(task.employee?.last_loginat),
+      'Last Logout': formatDateTime(task.employee?.last_logoutat),
       'Status': viewMode === 'assigned' ? 'pending' : 'paid'
     }));
 
@@ -252,11 +278,21 @@ const EmployeesTask = () => {
                         <div className="justify-content-between align-items-center">
                           <div>
                             <span className="fw-bold">{employee.name}</span>
-                            <small className="d-block text-muted">{employee.email}</small>
-                        
-                              <span className="">pending:{getTaskCountForEmployee(employee.eid, 'assigned')}</span><br/>
-                              <span className="">paid:{getTaskCountForEmployee(employee.eid, 'completed')}</span>
-                           
+                            <small className="d-block">{employee.email}</small>
+                            
+                            <span className="">pending: {getTaskCountForEmployee(employee.eid, 'assigned')}</span><br/>
+                            <span className="">paid: {getTaskCountForEmployee(employee.eid, 'completed')}</span>
+                            
+                            {employeeLoginDetails[employee.eid] && (
+                              <div className="mt-1 small">
+                                <div className="">
+                                  Last login: {formatDateTime(employeeLoginDetails[employee.eid].lastLogin)}
+                                </div>
+                                <div className="">
+                                  Last logout: {formatDateTime(employeeLoginDetails[employee.eid].lastLogout)}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </li>
@@ -357,17 +393,19 @@ const EmployeesTask = () => {
                           <th>Type</th>
                           <th>Price</th>
                           <th>Date & Time</th>
+                          <th>Last Login</th>
+                          <th>Last Logout</th>
                           <th>Status</th>
                         </tr>
                       </thead>
                       <tbody>
                         {!employeeTasks[selectedEmployee]?.[viewMode] ? (
                           <tr>
-                            <td colSpan="8" className="text-center">Loading data...</td>
+                            <td colSpan="10" className="text-center">Loading data...</td>
                           </tr>
                         ) : employeeTasks[selectedEmployee][viewMode].length === 0 ? (
                           <tr>
-                            <td colSpan="8" className="text-center">No {viewMode === 'assigned' ? 'pending' : 'completed'} tasks found</td>
+                            <td colSpan="10" className="text-center">No {viewMode === 'assigned' ? 'pending' : 'completed'} tasks found</td>
                           </tr>
                         ) : (
                           employeeTasks[selectedEmployee][viewMode].map((task, index) => (
@@ -379,6 +417,8 @@ const EmployeesTask = () => {
                               <td>{task.plan_type}</td>
                               <td>{task.amount ? `₹${task.amount}` : "-"}</td>
                               <td>{formatDateTime(viewMode === 'assigned' ? task.createdAt : task.payment_date)}</td>
+                              <td>{formatDateTime(task.employee?.last_loginat)}</td>
+                              <td>{formatDateTime(task.employee?.last_logoutat)}</td>
                               <td>
                                 <span style={{fontSize:'16px'}}>
                                   {viewMode === 'assigned' ? 'pending' : 'paid'}

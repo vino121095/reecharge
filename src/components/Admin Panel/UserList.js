@@ -3,7 +3,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import AdminLayout from '../AdminLayout';
 import baseurl from '../../Api Service/ApiService';
 
-
 const UserList = () => {
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +69,8 @@ const UserList = () => {
         payment_date: user.payment_date || '',
         username: user.username || '',
         status: user.payment_status || 'pending',
-        hasPrice: user.amount && parseFloat(user.amount) > 0
+        hasPrice: user.amount && parseFloat(user.amount) > 0,
+        old_price:user.old_price || 0
       }));
 
       setOperators(processedData);
@@ -96,7 +96,7 @@ const UserList = () => {
                 }
               });
               
-              console.log("Record distribution by employee:", assignmentCounts);
+             
             }
           }
         } catch (error) {
@@ -365,9 +365,6 @@ const UserList = () => {
                 <div className="alert alert-info py-2">
                   <div className="d-flex justify-content-between flex-wrap">
                     <span><strong>Total Records:</strong> {totalRecords}</span>
-                    {userRole === 'employee' && (
-                      <span><strong>Assigned to Me:</strong> {assignedToMe}</span>
-                    )}
                     <span><strong>Filtered Records:</strong> {totalItems}</span>
                     <span><strong>Records with Price:</strong> {operators.filter(op => op.hasPrice).length}</span>
                     <span><strong>Records without Price:</strong> {operators.filter(op => !op.hasPrice).length}</span>
@@ -423,7 +420,7 @@ const UserList = () => {
                         <td>{user.mobile_number}</td>
                         <td>{user.operator}</td>
                         <td>{user.plan_type}</td>
-                        <td>{formatDateTime(user.payment_date)}</td>
+                        <td>{formatDateTime(user.user_payment_datetime)}</td>
                         <td>{user.old_price ? `₹${user.old_price}` : "-"}</td>
                         <td>{user.amount ? `₹${user.amount}` : "-"}</td>
                         <td>{user.status}</td>
@@ -532,7 +529,11 @@ const UserList = () => {
           <td>{viewUser.plan_type}</td>
         </tr>
         <tr>
-          <th>Amount</th>
+          <th>Old Price</th>
+          <td>{viewUser.old_price ? `₹${viewUser.old_price}` : "-"}</td>
+        </tr>
+        <tr>
+          <th>New Price</th>
           <td>{viewUser.amount ? `₹${viewUser.amount}` : "-"}</td>
         </tr>
         <tr>
@@ -583,6 +584,8 @@ const UserList = () => {
       <strong>Username:</strong> {currentUser.username} <br />
       <strong>Mobile:</strong> {currentUser.mobile_number} <br />
       <strong>Operator:</strong> {currentUser.operator} <br />
+      <strong>Old Price:</strong> {currentUser.amount}<br />
+      <strong>New Price:</strong> {currentUser.old_price}<br />
       <strong>Current Status:</strong> {currentUser.status}
     </div>
   </div>

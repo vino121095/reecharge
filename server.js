@@ -7,6 +7,24 @@ const upload = require('./config/multerConfig.js');
 require('dotenv').config();
 const portfinder = require('portfinder');
 
+// Import models first
+const Employee = require('./models/addEmployee');
+const HomeData = require('./models/homeData');
+// Import other models as needed
+
+// Set up model associations
+HomeData.belongsTo(Employee, {
+  foreignKey: 'emp_id',
+  as: 'employee'  // Using lowercase 'employee' to match React code
+});
+
+Employee.hasMany(HomeData, {
+  foreignKey: 'emp_id',
+  as: 'homeData'
+});
+
+// Other associations can be added here
+
 const app = express();
 
 app.use(express.json());
@@ -17,8 +35,13 @@ app.use(cors());
 // console.log(hash);
 
 (async () => {
-  await db.sync();
-  console.log('Table created successfully');
+  try {
+    await db.sync();
+    console.log('✅ Database synchronized successfully');
+    console.log('✅ Model associations established');
+  } catch (error) {
+    console.error('❌ Error synchronizing database:', error);
+  }
 })();
 
 app.use(
