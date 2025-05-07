@@ -18,15 +18,15 @@ function PaidList() {
   const formatDateTime = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    
+
     if (isNaN(date.getTime())) return dateString;
-    
+
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    
+
     return `${day}-${month}-${year} ${hours}:${minutes}`;
   };
 
@@ -37,7 +37,7 @@ function PaidList() {
         const empid = localStorage.getItem('employeeId');
         const type = localStorage.getItem('userType');
         const id = empid;
-       
+
         setUserType(type);
         setUserId(id);
       } catch (error) {
@@ -53,7 +53,7 @@ function PaidList() {
     const fetchPaidData = async () => {
       try {
         let response;
-        
+
         // Use different API endpoints based on user type
         if (userType === 'admin') {
           // Admin sees all paid records
@@ -69,7 +69,7 @@ function PaidList() {
         if (!response.ok) {
           throw new Error(`Failed to fetch paid records: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setPaidList(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -98,17 +98,17 @@ function PaidList() {
 
   const getSortedData = () => {
     if (!paidList.length) return [];
-    
+
     const sortableItems = [...paidList];
     sortableItems.sort((a, b) => {
       // Handle date fields consistently
-      if (sortConfig.key === 'payment_date' || 
-          sortConfig.key === 'user_payment_datetime' || 
-          sortConfig.key === 'last_loginat' || 
-          sortConfig.key === 'last_logoutat') {
-        
+      if (sortConfig.key === 'payment_date' ||
+        sortConfig.key === 'user_payment_datetime' ||
+        sortConfig.key === 'last_loginat' ||
+        sortConfig.key === 'last_logoutat') {
+
         let dateA, dateB;
-        
+
         if (sortConfig.key === 'last_loginat' || sortConfig.key === 'last_logoutat') {
           // For employee fields, check if they exist
           dateA = a.employee && a.employee[sortConfig.key] ? new Date(a.employee[sortConfig.key]) : new Date(0);
@@ -118,11 +118,11 @@ function PaidList() {
           dateA = new Date(a[sortConfig.key] || '');
           dateB = new Date(b[sortConfig.key] || '');
         }
-        
+
         // Handle invalid dates
         if (isNaN(dateA.getTime())) dateA = new Date(0);
         if (isNaN(dateB.getTime())) dateB = new Date(0);
-        
+
         if (dateA < dateB) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -133,7 +133,7 @@ function PaidList() {
       } else if (sortConfig.key === 'amount') {
         const amountA = parseFloat(a[sortConfig.key] || 0);
         const amountB = parseFloat(b[sortConfig.key] || 0);
-        return sortConfig.direction === 'asc' 
+        return sortConfig.direction === 'asc'
           ? amountA - amountB
           : amountB - amountA;
       } else {
@@ -158,12 +158,12 @@ function PaidList() {
         alert('No data available to export');
         return;
       }
-      
+
       // Filter data based on date selection
       let filteredData = [...paidList];
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (exportDate === 'today') {
         filteredData = paidList.filter(user => {
           const paymentDate = new Date(user.payment_date || '');
@@ -173,10 +173,10 @@ function PaidList() {
       } else if (exportDate === 'date-range' && startDate && endDate) {
         const startDateTime = new Date(startDate);
         startDateTime.setHours(0, 0, 0, 0);
-        
+
         const endDateTime = new Date(endDate);
         endDateTime.setHours(23, 59, 59, 999);
-        
+
         filteredData = paidList.filter(user => {
           const paymentDate = new Date(user.payment_date || '');
           return paymentDate >= startDateTime && paymentDate <= endDateTime;
@@ -221,15 +221,15 @@ function PaidList() {
       // Create and download CSV file
       const csvString = csvRows.join('\n');
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-      
+
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       const dateFormat = new Date().toISOString().split('T')[0];
       link.setAttribute('href', url);
       link.setAttribute('download', `paid_users_${dateFormat}.csv`);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -286,35 +286,35 @@ function PaidList() {
               {userType === 'admin' ? 'Paid Users List' : 'My Paid List'}
             </h5>
             <div className="export-controls d-flex">
-              <select 
-                className="form-select form-select-sm me-2" 
-                value={exportDate} 
+              <select
+                className="form-select form-select-sm me-2"
+                value={exportDate}
                 onChange={handleExportDateChange}
               >
                 <option value="all">All Data</option>
                 <option value="today">Today</option>
                 <option value="date-range">Date Range</option>
               </select>
-              
+
               {showDateRange && (
                 <>
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     className="form-control form-control-sm me-2"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                   />
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     className="form-control form-control-sm me-2"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                   />
                 </>
               )}
-              
-              <button 
-                className="btn btn-sm btn-light" 
+
+              <button
+                className="btn btn-sm btn-light"
                 onClick={exportToExcel}
                 disabled={exportDate === 'date-range' && (!startDate || !endDate)}
               >
@@ -328,34 +328,37 @@ function PaidList() {
                 <thead>
                   <tr>
                     <th>S No</th>
-                    <th onClick={() => requestSort('username')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('username')} style={{ cursor: 'pointer' }}>
                       Username {getSortIndicator('username')}
                     </th>
-                    <th onClick={() => requestSort('mobile_number')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('mobile_number')} style={{ cursor: 'pointer' }}>
                       Phone Number {getSortIndicator('mobile_number')}
                     </th>
-                    <th onClick={() => requestSort('operator')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('operator')} style={{ cursor: 'pointer' }}>
                       Operator {getSortIndicator('operator')}
                     </th>
-                    <th onClick={() => requestSort('plan_type')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('plan_type')} style={{ cursor: 'pointer' }}>
                       Type {getSortIndicator('plan_type')}
                     </th>
-                    <th onClick={() => requestSort('amount')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('amount')} style={{ cursor: 'pointer' }}>
                       Amount {getSortIndicator('amount')}
                     </th>
-                    <th onClick={() => requestSort('user_payment_datetime')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('user_payment_datetime')} style={{ cursor: 'pointer' }}>
                       User Payment Date {getSortIndicator('user_payment_datetime')}
                     </th>
-                    <th onClick={() => requestSort('payment_date')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('payment_date')} style={{ cursor: 'pointer' }}>
                       Employee Payment Date {getSortIndicator('payment_date')}
                     </th>
-                    <th onClick={() => requestSort('payment_status')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('payment_status')} style={{ cursor: 'pointer' }}>
                       Status {getSortIndicator('payment_status')}
                     </th>
-                    <th onClick={() => requestSort('last_loginat')} style={{cursor: 'pointer'}}>
+                    <th style={{ cursor: 'pointer' }}>
+                      Image
+                    </th>
+                    <th onClick={() => requestSort('last_loginat')} style={{ cursor: 'pointer' }}>
                       Last Login {getSortIndicator('last_loginat')}
                     </th>
-                    <th onClick={() => requestSort('last_logoutat')} style={{cursor: 'pointer'}}>
+                    <th onClick={() => requestSort('last_logoutat')} style={{ cursor: 'pointer' }}>
                       Last Logout {getSortIndicator('last_logoutat')}
                     </th>
                   </tr>
@@ -380,13 +383,17 @@ function PaidList() {
                           {user.payment_status || '-'}
                         </td>
                         <td>
-                          {user.employee?.last_loginat 
-                            ? formatDateTime(user.employee.last_loginat) 
+                          <img src={`${baseurl}/${user.screenshot_path}`} alt={user.username} />
+                        </td>
+
+                        <td>
+                          {user.employee?.last_loginat
+                            ? formatDateTime(user.employee.last_loginat)
                             : '-'}
                         </td>
                         <td>
-                          {user.employee?.last_logoutat 
-                            ? formatDateTime(user.employee.last_logoutat) 
+                          {user.employee?.last_logoutat
+                            ? formatDateTime(user.employee.last_logoutat)
                             : '-'}
                         </td>
                       </tr>

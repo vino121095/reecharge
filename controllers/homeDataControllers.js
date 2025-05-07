@@ -1,5 +1,6 @@
 const HomeData = require('../models/homeData'); // Adjust path as needed
  const Employee = require('../models/addEmployee');
+ const User = require('../models/user');
 
 const createHomeData = async (req, res) => {
     try {
@@ -195,6 +196,34 @@ const getEmployeeAllHomeData = async (req, res) => {
     }
 };
 
+const getUserRechargeHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // First find the user to verify they exist
+        const user = await User.findOne({
+            where: { uid:userId }
+        });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Get all recharge history where mobile_number matches user's phone
+        const rechargeHistory = await HomeData.findAll({
+            where: {
+                userId: userId
+            },
+            order: [['payment_date', 'DESC']] // Most recent first
+        });
+        
+        return res.status(200).json(rechargeHistory);
+    } catch (error) {
+        console.error('Error fetching recharge history:', error);
+        return res.status(500).json({ error: error.message });
+    }
+};
+
 
 // Add these to your module.exports
 module.exports = {
@@ -208,6 +237,7 @@ module.exports = {
     deleteHomeData,
     getEmployeePendingHomeData,
     getEmployeePaidHomeData,    // Added
-    getEmployeeAllHomeData      // Added
+    getEmployeeAllHomeData ,
+    getUserRechargeHistory    // Added
 };
  

@@ -1,5 +1,6 @@
 import './App.css';
 import React from 'react';
+import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './components/Home';
 import About from './components/About';
@@ -17,23 +18,25 @@ import PrivacyPolicy from './PrivacyPolicy';
 import AboutUs from './components/AboutUs';
 import Services from './components/Service';
 import PaymentSuccess from './components/PaymentSuccess';
-import AddFeaturesForm from './components/Admin Panel/AddFeaturesForm'
-import EmployeesTask from './components/Admin Panel/EmployeesTask'
+import AddFeaturesForm from './components/Admin Panel/AddFeaturesForm';
+import EmployeesTask from './components/Admin Panel/EmployeesTask';
+import RechargeHistory from './components/RechargeHistory';
 function App() {
   return (
       <div className="App">
         <div>
           <Routes>
             {/* Frontend */}
-            {/* <Route path="/" element={<SignIn />} /> */}
+            <Route path="/" element={<SignIn />} />
             <Route path="/about" element={<About />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/service" element={<Services />} />
             <Route path="/plandetail" element={<PlanDetail />} />
-            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            {/* <Route path="/signup" element={<SignUp />} /> */}
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/recharge-history" element={<RechargeHistory />} />
             {/* Backend */}
             <Route path="/admin" element={<Login />} />
             <Route path="/userlist" element={<UserList />} />

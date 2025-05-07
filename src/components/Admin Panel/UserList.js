@@ -22,6 +22,24 @@ const UserList = () => {
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [assignedToMe, setAssignedToMe] = useState(0);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
+
+  // Function to format image paths correctly
+  const formatImagePath = (path) => {
+    if (!path) return null;
+    
+    // Replace backslashes with forward slashes for web URLs
+    const formattedPath = path.replace(/\\/g, '/');
+    
+    // Check if path already includes base URL
+    if (formattedPath.startsWith('http') || formattedPath.startsWith('/')) {
+      return formattedPath;
+    }
+    
+    // Add the base URL
+    return `${baseurl}/${formattedPath}`;
+  };
 
   const formatDateTime = (dateString) => {
     if (!dateString) return '';
@@ -70,7 +88,9 @@ const UserList = () => {
         username: user.username || '',
         status: user.payment_status || 'pending',
         hasPrice: user.amount && parseFloat(user.amount) > 0,
-        old_price:user.old_price || 0
+        old_price: user.old_price || 0,
+        // Format screenshot path correctly
+        screenshot_url: formatImagePath(user.screenshot_url || user.screenshot_path || null)
       }));
 
       setOperators(processedData);
@@ -95,8 +115,6 @@ const UserList = () => {
                   assignmentCounts[record.emp_id] = (assignmentCounts[record.emp_id] || 0) + 1;
                 }
               });
-              
-             
             }
           }
         } catch (error) {
@@ -118,7 +136,6 @@ const UserList = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Rest of your component code remains the same...
   const handleSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -203,6 +220,20 @@ const UserList = () => {
   const handleCloseView = () => {
     setShowView(false);
     setViewUser(null);
+  };
+
+  const handleViewImage = (imageUrl) => {
+    if (imageUrl) {
+      setImagePreviewUrl(imageUrl);
+      setShowImageModal(true);
+    } else {
+      alert('No screenshot available for this user.');
+    }
+  };
+
+  const handleCloseImageModal = () => {
+    setShowImageModal(false);
+    setImagePreviewUrl(null);
   };
 
   const toggleRechargeDisplay = () => {
@@ -355,8 +386,6 @@ const UserList = () => {
                   <option value={50}>50 per page</option>
                 </select>
               </div>
-
-              
             </div>
 
             {/* Stats Summary */}
@@ -391,7 +420,6 @@ const UserList = () => {
                     <th>Phone Number</th>
                     <th>Operator</th>
                     <th>Type</th>
-                    
                     <th onClick={() => handleSort('payment_date')} style={{ cursor: 'pointer' }}>
                       Date & Time {sortConfig.key === 'payment_date' && (
                         <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
@@ -403,6 +431,7 @@ const UserList = () => {
                         <i className={`bi bi-arrow-${sortConfig.direction === 'ascending' ? 'up' : 'down'}`}></i>
                       )}
                     </th>
+                    <th>Screenshot</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -410,7 +439,7 @@ const UserList = () => {
                 <tbody>
                   {currentItems.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="text-center">No records found</td>
+                      <td colSpan="11" className="text-center">No records found</td>
                     </tr>
                   ) : (
                     currentItems.map((user, index) => (
@@ -423,6 +452,18 @@ const UserList = () => {
                         <td>{formatDateTime(user.user_payment_datetime)}</td>
                         <td>{user.old_price ? `₹${user.old_price}` : "-"}</td>
                         <td>{user.amount ? `₹${user.amount}` : "-"}</td>
+                        <td>
+                          {user.screenshot_url ? (
+                            <button 
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => handleViewImage(user.screenshot_url)}
+                            >
+                             <i className="bi bi-image"></i> View
+                            </button>
+                          ) : (
+                            <span className="text-muted">No image</span>
+                          )}
+                        </td>
                         <td>{user.status}</td>
                         <td>
                           <button
@@ -499,144 +540,219 @@ const UserList = () => {
           <div className="modal show d-block" tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
-
-<div className="modal-header">
-  <h5 className="modal-title">User Details</h5>
-  <button type="button" className="btn-close" onClick={handleCloseView}></button>
-</div>
-<div className="modal-body">
-  <div className="table-responsive">
-    <table className="table table-bordered">
-      <tbody>
-        <tr>
-          <th>ID</th>
-          <td>{viewUser.id}</td>
-        </tr>
-        <tr>
-          <th>Username</th>
-          <td>{viewUser.username}</td>
-        </tr>
-        <tr>
-          <th>Mobile Number</th>
-          <td>{viewUser.mobile_number}</td>
-        </tr>
-        <tr>
-          <th>Operator</th>
-          <td>{viewUser.operator}</td>
-        </tr>
-        <tr>
-          <th>Plan Type</th>
-          <td>{viewUser.plan_type}</td>
-        </tr>
-        <tr>
-          <th>Old Price</th>
-          <td>{viewUser.old_price ? `₹${viewUser.old_price}` : "-"}</td>
-        </tr>
-        <tr>
-          <th>New Price</th>
-          <td>{viewUser.amount ? `₹${viewUser.amount}` : "-"}</td>
-        </tr>
-        <tr>
-          <th>Status</th>
-          <td>{viewUser.status}</td>
-        </tr>
-        <tr>
-          <th>Payment Date</th>
-          <td>{formatDateTime(viewUser.payment_date)}</td>
-        </tr>
-        {viewUser.emp_id && (
-          <tr>
-            <th>Assigned Employee</th>
-            <td>{viewUser.emp_id}</td>
-          </tr>
+                <div className="modal-header">
+                  <h5 className="modal-title">User Details</h5>
+                  <button type="button" className="btn-close" onClick={handleCloseView}></button>
+                </div>
+                <div className="modal-body">
+                  <div className="table-responsive">
+                    <table className="table table-bordered">
+                      <tbody>
+                        <tr>
+                          <th>ID</th>
+                          <td>{viewUser.id}</td>
+                        </tr>
+                        <tr>
+                          <th>Username</th>
+                          <td>{viewUser.username}</td>
+                        </tr>
+                        <tr>
+                          <th>Mobile Number</th>
+                          <td>{viewUser.mobile_number}</td>
+                        </tr>
+                        <tr>
+                          <th>Operator</th>
+                          <td>{viewUser.operator}</td>
+                        </tr>
+                        <tr>
+                          <th>Plan Type</th>
+                          <td>{viewUser.plan_type}</td>
+                        </tr>
+                        <tr>
+                          <th>Old Price</th>
+                          <td>{viewUser.old_price ? `₹${viewUser.old_price}` : "-"}</td>
+                        </tr>
+                        <tr>
+                          <th>New Price</th>
+                          <td>{viewUser.amount ? `₹${viewUser.amount}` : "-"}</td>
+                        </tr>
+                        <tr>
+                          <th>Status</th>
+                          <td>{viewUser.status}</td>
+                        </tr>
+                        <tr>
+                          <th>Payment Date</th>
+                          <td>{formatDateTime(viewUser.payment_date)}</td>
+                        </tr>
+                        {viewUser.emp_id && (
+                          <tr>
+                            <th>Assigned Employee</th>
+                            <td>{viewUser.emp_id}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <th>Screenshot</th>
+                          <td>
+                            {viewUser.screenshot_url ? (
+                              <button 
+                                className="btn btn-sm btn-primary"
+                                onClick={() => handleViewImage(viewUser.screenshot_url)}
+                              >
+                                View Screenshot
+                              </button>
+                            ) : (
+                              <span className="text-muted">No screenshot available</span>
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={handleCloseView}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
-      </tbody>
-    </table>
-  </div>
-</div>
-<div className="modal-footer">
-  <button type="button" className="btn btn-secondary" onClick={handleCloseView}>
-    Close
-  </button>
-</div>
-</div>
-</div>
-</div>
-)}
 
-{/* Edit Modal */}
-{editModalShow && currentUser && (
-<div className="modal show d-block" tabIndex="-1">
-<div className="modal-dialog modal-dialog-centered">
-<div className="modal-content">
-<div className="modal-header">
-  <h5 className="modal-title">Update Status</h5>
-  <button 
-    type="button" 
-    className="btn-close" 
-    onClick={() => setEditModalShow(false)}
-  ></button>
-</div>
-<div className="modal-body">
-  <div className="mb-3">
-    <label htmlFor="userDetails" className="form-label">User Details</label>
-    <div id="userDetails" className="form-text">
-      <strong>Username:</strong> {currentUser.username} <br />
-      <strong>Mobile:</strong> {currentUser.mobile_number} <br />
-      <strong>Operator:</strong> {currentUser.operator} <br />
-      <strong>Old Price:</strong> {currentUser.amount}<br />
-      <strong>New Price:</strong> {currentUser.old_price}<br />
-      <strong>Current Status:</strong> {currentUser.status}
-    </div>
-  </div>
-  <div className="mb-3">
-    <label htmlFor="statusSelect" className="form-label">New Status</label>
-    <select 
-      id="statusSelect" 
-      className="form-select" 
-      value={newStatus} 
-      onChange={handleStatusChange}
-    >
-      <option value="pending">Pending</option>
-      <option value="paid">paid</option>
-      
-    </select>
-  </div>
-</div>
-<div className="modal-footer">
-  <button 
-    type="button" 
-    className="btn btn-secondary" 
-    onClick={() => setEditModalShow(false)}
-  >
-    Cancel
-  </button>
-  <button 
-    type="button" 
-    className="btn btn-primary" 
-    onClick={handleSaveEdit}
-  >
-    Save Changes
-  </button>
-</div>
-</div>
-</div>
-</div>
-)}
+        {/* Edit Modal */}
+        {editModalShow && currentUser && (
+          <div className="modal show d-block" tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Update Status</h5>
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    onClick={() => setEditModalShow(false)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="userDetails" className="form-label">User Details</label>
+                    <div id="userDetails" className="form-text">
+                      <strong>Username:</strong> {currentUser.username} <br />
+                      <strong>Mobile:</strong> {currentUser.mobile_number} <br />
+                      <strong>Operator:</strong> {currentUser.operator} <br />
+                      <strong>Old Price:</strong> {currentUser.old_price}<br />
+                      <strong>New Price:</strong> {currentUser.amount}<br />
+                      <strong>Current Status:</strong> {currentUser.status}
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="statusSelect" className="form-label">New Status</label>
+                    <select 
+                      id="statusSelect" 
+                      className="form-select" 
+                      value={newStatus} 
+                      onChange={handleStatusChange}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="paid">paid</option>
+                    </select>
+                  </div>
+                  {currentUser.screenshot_url && (
+                    <div className="mb-3">
+                      <label className="form-label">Screenshot</label>
+                      <div>
+                        <button 
+                          className="btn btn-sm btn-primary"
+                          onClick={() => handleViewImage(currentUser.screenshot_url)}
+                        >
+                          View Screenshot
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => setEditModalShow(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn-primary" 
+                    onClick={handleSaveEdit}
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-{/* Backdrop for modals */}
-{(showView || editModalShow) && (
-<div 
-className="modal-backdrop fade show" 
-onClick={() => {
-setShowView(false);
-setEditModalShow(false);
-}}
-></div>
-)}
-</div>
-</AdminLayout>
-);
+        {/* Image Preview Modal */}
+        {showImageModal && imagePreviewUrl && (
+          <div className="modal show d-block" tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Screenshot Preview</h5>
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    onClick={handleCloseImageModal}
+                  ></button>
+                </div>
+                <div className="modal-body text-center">
+                  <img 
+                    src={imagePreviewUrl} 
+                    alt="User Screenshot" 
+                    className="img-fluid" 
+                    style={{ maxHeight: '70vh' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      console.error('Image failed to load:', imagePreviewUrl);
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBkeT0iLjNlbSI+SW1hZ2UgZmFpbGVkIHRvIGxvYWQ8L3RleHQ+PC9zdmc+';
+                    }}
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={handleCloseImageModal}
+                  >
+                    Close
+                  </button>
+                  <a 
+                    href={imagePreviewUrl} 
+                    className="btn btn-primary" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Open in New Tab
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Backdrop for modals */}
+        {(showView || editModalShow || showImageModal) && (
+          <div 
+            className="modal-backdrop fade show" 
+            onClick={() => {
+              setShowView(false);
+              setEditModalShow(false);
+              setShowImageModal(false);
+            }}
+          ></div>
+        )}
+      </div>
+    </AdminLayout>
+  );
 };
 
 export default UserList;

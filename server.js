@@ -6,7 +6,7 @@ const db = require('./config/db.js');
 const upload = require('./config/multerConfig.js');
 require('dotenv').config();
 const portfinder = require('portfinder');
-
+const path = require('path');
 // Import models first
 const Employee = require('./models/addEmployee');
 const HomeData = require('./models/homeData');
@@ -28,7 +28,7 @@ Employee.hasMany(HomeData, {
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors());
 // const connectionString = 'mysql://glitztec_recharge_db:Tf8^I@^7Dbs=@185.189.27.48:3306/glitztec_recharge_db';
 // const hash = crypto.createHash('sha256').update(connectionString).digest('hex');
@@ -71,6 +71,7 @@ const homeDataRoutes = require('./routes/homeDataRoutes');
 const addEmployeeRoutes = require('./routes/addEmployeeRoutes');
 const featureRoutes = require('./routes/featureRoutes.js');
 const planFeatureRoutes = require('./routes/planFeatureRoutes');
+const screenshotRoutes = require('./routes/screenshotRoutes');
 
 // Setup API routes
 app.use('/api', adminRoutes);
@@ -82,6 +83,7 @@ app.use('/api', homeDataRoutes);
 app.use('/api', addEmployeeRoutes);
 app.use('/api', featureRoutes);
 app.use('/api/plan-features', planFeatureRoutes);
+app.use('/api', screenshotRoutes);
 
 console.log('✅ Routes initialized successfully');
 console.log("Registered Routes:");

@@ -8,6 +8,10 @@ const HomeData = sequelize.define('home_data', {
         autoIncrement: true,
         allowNull: false
     },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     username: {
         type: DataTypes.STRING(255),
         allowNull: false
@@ -65,6 +69,14 @@ const HomeData = sequelize.define('home_data', {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
+    screenshot_path: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    screenshot_uploaded_at: {
+        type: DataTypes.DATE,
+        allowNull: true
+    }
 }, {
     tableName: 'home_data',
     timestamps: false,
