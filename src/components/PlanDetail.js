@@ -11,6 +11,12 @@ const PlanDetail = () => {
     const [planFeatures, setPlanFeatures] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [transactionRef, setTransactionRef] = useState('');
+    const [qrCodeUrl, setQrCodeUrl] = useState('');
+    
+    // Merchant UPI details - replace with your actual details
+    const merchantUpiId = "mugeshkumar891999@oksbi";
+    const merchantName = "Rbtamilan";
 
     useEffect(() => {
         const fetchOperatorData = async () => {
@@ -53,6 +59,21 @@ const PlanDetail = () => {
         fetchPlanFeatures();
     }, [plan?.pid]);
 
+    // Generate QR code for UPI payment
+    const generateUpiQrCode = () => {
+        if (!plan?.new_price) return null;
+        
+        const amount = plan.new_price;
+        const note = `Payment for ${plan.plan_name}`;
+        const txnRef = transactionRef || `UPI_${Date.now()}`;
+        
+        // Generate QR code using UPI intent parameters
+        const upiUrl = `upi://pay?pa=${encodeURIComponent(merchantUpiId)}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}&tr=${encodeURIComponent(txnRef)}`;
+        
+        // Use a QR code generator API - this example uses QR Server API
+        return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+    };
+
     const updatePaymentStatus = async (paymentDetails) => {
         if (!homeDataId) {
             console.error("homeDataId is missing!");
@@ -67,14 +88,14 @@ const PlanDetail = () => {
                 plan_name: plan?.plan_name,
                 old_price: plan?.old_price,
                 amount: plan?.new_price,
-                payment_status: paymentDetails.status,
-                transaction_id: paymentDetails.razorpay_payment_id,
-                payment_method: paymentDetails.method || 'razorpay',
+                payment_status: paymentDetails.status || 'pending',
+                transaction_id: paymentDetails.transaction_id || 'pending',
+                payment_method: paymentDetails.method || 'upi',
                 currency: 'INR',
                 payment_date: new Date().toISOString(),
                 user_payment_datetime: new Date().toISOString(),
-                customer_email: paymentDetails.email,
-                customer_contact: paymentDetails.contact,
+                customer_email: paymentDetails.email || '',
+                customer_contact: paymentDetails.contact || '',
                 operator: plan?.operator,
                 payment_response: JSON.stringify(paymentDetails)
             };
@@ -88,20 +109,19 @@ const PlanDetail = () => {
                 plan_name: plan?.plan_name,
                 amount: plan?.new_price,
                 old_price: plan?.old_price,
-                payment_status: paymentDetails.status,
-                transaction_id: paymentDetails.razorpay_payment_id,
+                payment_status: paymentDetails.status || 'pending',
+                transaction_id: paymentDetails.transaction_id || 'pending',
             });
 
         } catch (error) {
             console.error('Error storing payment details:', error);
             setError('Failed to store payment details.');
-            throw error; // Rethrow to handle in calling function
+            throw error;
         }
     };
 
-    const handlePayment = async () => {
+    const initiateUpiPayment = async () => {
         if (!plan?.new_price) {
-            console.error("Plan details are missing!");
             alert("Invalid plan details. Please try again.");
             return;
         }
@@ -109,103 +129,93 @@ const PlanDetail = () => {
         try {
             setLoading(true);
 
-            // Load Razorpay script dynamically
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            document.body.appendChild(script);
+            // Create transaction reference
+            const txnRef = `UPI_${Date.now()}`;
+            setTransactionRef(txnRef);
 
-            script.onload = () => {
-                const options = {
-                    key: 'rzp_test_a60jtifB0U4uQy',
-                    amount: plan.new_price * 100,
-                    currency: 'INR',
-                    name: 'Your Company Name',
-                    description: `Payment for ${plan.plan_name}`,
-                    handler: async function (response) {
-                        try {
-                            console.log("Payment Response:", response);
-                            if (response.razorpay_payment_id) {
-                                // Prepare payment details
-                                const paymentDetails = {
-                                    status: 'pending',
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    method: 'razorpay',
-                                    email: options.prefill.email,
-                                    contact: options.prefill.contact,
-                                    amount: plan.new_price,
-                                    timestamp: new Date().toISOString(),
-                                    user_payment_datetime: new Date().toISOString()
-                                };
+            // Generate QR code URL
+            const qrUrl = generateUpiQrCode();
+            setQrCodeUrl(qrUrl);
 
-                                // Store payment details
-                                await updatePaymentStatus(paymentDetails);
-                                navigate(`/payment-success/${homeDataId}`);
-                            } else {
-                                const failedPaymentDetails = {
-                                    status: 'failed',
-                                    razorpay_payment_id: null,
-                                    error_description: 'Payment verification failed',
-                                    email: options.prefill.email,
-                                    contact: options.prefill.contact,
-                                    timestamp: new Date().toISOString(),
-                                    user_payment_datetime: new Date().toISOString()
-                                };
-                                await updatePaymentStatus(failedPaymentDetails);
-                                alert('Payment verification failed!');
-                            }
-                        } catch (error) {
-                            console.error("Error processing payment:", error);
-                            alert("Something went wrong. Please contact support.");
-                        } finally {
-                            setLoading(false);
-                        }
-                    },
-                    prefill: {
-                        email: 'customer@example.com',
-                        contact: ''
-                    },
-                    theme: {
-                        color: '#3399cc'
-                    },
-                    modal: {
-                        ondismiss: async function () {
-                            try {
-                                const cancelledPaymentDetails = {
-                                    status: 'cancelled',
-                                    razorpay_payment_id: null,
-                                    error_description: 'Payment cancelled by user',
-                                    email: options.prefill.email,
-                                    contact: options.prefill.contact,
-                                    timestamp: new Date().toISOString(),
-                                    user_payment_datetime: new Date().toISOString()
-                                };
-                                await updatePaymentStatus(cancelledPaymentDetails);
-                            } catch (error) {
-                                console.error("Error updating cancelled payment:", error);
-                            } finally {
-                                setLoading(false);
-                                alert('Payment cancelled');
-                            }
-                        }
-                    }
-                };
-
-                const razorpayInstance = new window.Razorpay(options);
-                razorpayInstance.open();
+            // First record the payment attempt in your system
+            const paymentInitDetails = {
+                status: 'pending',
+                transaction_id: txnRef,
+                method: 'upi',
+                amount: plan.new_price,
+                timestamp: new Date().toISOString()
             };
 
-            script.onerror = () => {
-                setLoading(false);
-                alert('Failed to load payment gateway. Please try again.');
-            };
+            await updatePaymentStatus(paymentInitDetails);
+
+            // Store transaction reference in localStorage for verification when user returns
+            localStorage.setItem('pendingTransaction', txnRef);
+            localStorage.setItem('pendingHomeDataId', homeDataId);
+
+            setLoading(false);
 
         } catch (error) {
-            console.error("Error initializing payment:", error);
+            console.error("Error initiating payment:", error);
             alert("An unexpected error occurred. Please try again.");
             setLoading(false);
         }
+    };
+
+    // Handle manual verification after payment
+    const verifyPayment = async () => {
+        const pendingTransaction = localStorage.getItem('pendingTransaction');
+        
+        if (pendingTransaction) {
+            try {
+                setLoading(true);
+                
+                // Here you would normally check with your backend if payment was received
+                // For demo purposes, we'll just update status to success
+                
+                const paymentDetails = {
+                    status: 'pending',
+                    transaction_id: pendingTransaction,
+                    method: 'upi',
+                    timestamp: new Date().toISOString()
+                };
+                
+                await updatePaymentStatus(paymentDetails);
+                
+                // Clear the pending transaction
+                localStorage.removeItem('pendingTransaction');
+                localStorage.removeItem('pendingHomeDataId');
+                
+                // Redirect to success page
+                navigate(`/payment-success/${homeDataId}`);
+                
+            } catch (error) {
+                console.error("Error verifying payment:", error);
+                alert("Failed to verify payment. Please contact support.");
+                setLoading(false);
+            }
+        } else {
+            alert("No pending transaction found.");
+        }
+    };
+
+    // Function to copy UPI ID to clipboard
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                alert("UPI ID copied to clipboard!");
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+                alert("Failed to copy. Please manually select and copy the UPI ID.");
+            });
+    };
+
+    // Function to open QR code in a new tab
+    const openQrCodeInNewTab = () => {
+        if (!qrCodeUrl) return;
+        
+        // Open the QR code in a new tab
+        window.open(qrCodeUrl, '_blank');
     };
 
     const getImageUrl = (filename) => {
@@ -214,43 +224,50 @@ const PlanDetail = () => {
         }
         return `${baseurl}/api/operators/image/${filename}`;
     };
-    // Fixed buildImageUrl function to correctly handle feature images
+
     const buildImageUrl = (imagePath) => {
-        // If no path provided, return default image
         if (!imagePath) {
-            return '/assets/icons/feature-default.png';
+            return '/assets/icons/feature-default.png'; 
         }
         
-        // If path already starts with http or https, return as is
         if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
             return imagePath;
         }
         
-        // If the path includes `/uploads/`, it's already a full path
         if (imagePath.includes('/uploads/')) {
             return `${baseurl}${imagePath}`;
         }
         
-        // Handle the case where only filename is provided (from the feature response)
-        // This is the key fix for feature images
         if (!imagePath.startsWith('/')) {
             return `${baseurl}/api/features/image/${imagePath}`;
         }
         
-        // For other API endpoint paths
         const base = baseurl.endsWith('/') ? baseurl.slice(0, -1) : baseurl;
         const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
         
         return `${base}${path}`;
     };
 
-    // Fix for image error handling
     const handleImageError = (e, defaultImage) => {
         if (!e.target.src.includes(defaultImage.split('/').pop())) {
             e.target.src = defaultImage;
-            e.target.onerror = null; // Prevent further error handling if default image fails
+            e.target.onerror = null;
         }
     };
+
+    // Check if we're returning from a payment
+    useEffect(() => {
+        const pendingTransaction = localStorage.getItem('pendingTransaction');
+        const pendingHomeDataId = localStorage.getItem('pendingHomeDataId');
+        
+        if (pendingTransaction && pendingHomeDataId && pendingHomeDataId === homeDataId) {
+            // Show verification dialog
+            const shouldVerify = window.confirm("Did you complete the payment? Click OK to verify payment or Cancel to try again.");
+            if (shouldVerify) {
+                verifyPayment();
+            }
+        }
+    }, [homeDataId]);
 
     if (!plan) {
         return <p>No plan details available.</p>;
@@ -338,15 +355,113 @@ const PlanDetail = () => {
                         </div>
                     </div>
 
-                    <button
-                        className="btn btn-primary btn-block mt-4 mb-4 w-100"
-                        onClick={handlePayment}
-                        disabled={loading}
-                    >
-                        {loading ? 'Processing...' : 'Pay Now'}
-                    </button>
+                    {/* UPI Payment Section */}
+                    {!qrCodeUrl ? (
+                        <div className="mt-4">
+                            <button
+                                className="btn btn-primary btn-block w-100 py-2"
+                                onClick={initiateUpiPayment}
+                                disabled={loading}
+                            >
+                                {loading ? 'Processing...' : 'Pay Now'}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="card mt-4">
+                            <div className="card-body">
+                                <h5 className="text-center mb-3">Make Payment Using UPI</h5>
+                                
+                                {/* QR Code Section */}
+                                <div className="text-center mb-4">
+                                    <p className="fw-bold mb-2">Scan QR Code to Pay</p>
+                                    <div className="d-flex justify-content-center">
+                                        <img 
+                                            src={qrCodeUrl} 
+                                            alt="UPI QR Code" 
+                                            style={{width: "200px", height: "200px"}}
+                                            className="border p-2"
+                                        />
+                                    </div>
+                                    <button 
+                                        className="btn btn-sm btn-outline-primary mt-2" 
+                                        onClick={openQrCodeInNewTab}
+                                    >
+                                        <i className="bi bi-box-arrow-up-right me-1"></i> Open QR Code
+                                    </button>
+                                    <p className="text-muted mt-2 small">
+                                        Scan this QR code with any UPI app to pay
+                                    </p>
+                                </div>
+                                
+                                <div className="text-center">
+                                    <div className="mb-3">
+                                        <span className="fw-bold">Or pay using UPI ID:</span> 
+                                        <div className="d-flex align-items-center justify-content-center mt-2">
+                                            <input 
+                                                type="text" 
+                                                value={merchantUpiId} 
+                                                className="form-control text-center" 
+                                                readOnly 
+                                                style={{maxWidth: "250px", margin: "0 auto"}}
+                                            />
+                                            <button 
+                                                className="btn btn-sm btn-outline-primary ms-2" 
+                                                onClick={() => copyToClipboard(merchantUpiId)}
+                                            >
+                                                <i className="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-3">
+                                        <span className="fw-bold">Amount:</span> 
+                                        <div className="mt-1">₹{plan.new_price}</div>
+                                    </div>
+                                    
+                                    <div className="mb-3">
+                                        <span className="fw-bold">Transaction Reference:</span> 
+                                        <div className="mt-1">{transactionRef}</div>
+                                    </div>
+                                    
+                                    <hr />
+                                    
+                                    <div className="mb-3">
+                                        <p className="fw-bold">How to pay:</p>
+                                        <ol className="text-start">
+                                            <li>Open your UPI app (Google Pay, PhonePe, BHIM, etc.)</li>
+                                            <li>Scan the QR code above OR enter UPI ID manually</li>
+                                            <li>Enter amount: <span className="fw-bold">₹{plan.new_price}</span></li>
+                                            <li>In remarks/description, enter reference: <span className="fw-bold">{transactionRef}</span></li>
+                                            <li>Complete the payment</li>
+                                            <li>Click "I have completed payment" button below</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                
+                                <div className="d-grid gap-2">
+                                    <button
+                                        className="btn btn-success py-2"
+                                        onClick={verifyPayment}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Verifying...' : 'I have completed payment'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
-                    <p style={{textAlign: "center"}}>
+                    {localStorage.getItem('pendingTransaction') && !qrCodeUrl && (
+                        <button
+                            className="btn btn-success btn-block w-100 mt-3 py-2"
+                            onClick={verifyPayment}
+                            disabled={loading}
+                        >
+                            {loading ? 'Verifying...' : 'I have completed payment'}
+                        </button>
+                    )}
+                    
+                    <p style={{textAlign: "center"}} className="mt-4">
                         <a href="/contact">Contact Us</a>
                     </p>
                 </div>

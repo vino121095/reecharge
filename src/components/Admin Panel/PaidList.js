@@ -383,7 +383,7 @@ function PaidList() {
                           {user.payment_status || '-'}
                         </td>
                         <td>
-                          <img src={`${baseurl}/${user.screenshot_path}`} alt={user.username} />
+                          <img src={`${baseurl}/${user.screenshot_path}`} alt={user.username} style={{width:'50px'}}/>
                         </td>
 
                         <td>
