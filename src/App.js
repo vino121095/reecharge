@@ -21,6 +21,7 @@ import PaymentSuccess from './components/PaymentSuccess';
 import AddFeaturesForm from './components/Admin Panel/AddFeaturesForm';
 import EmployeesTask from './components/Admin Panel/EmployeesTask';
 import RechargeHistory from './components/RechargeHistory';
+import Payment from './components/Admin Panel/Payment';
 function App() {
   return (
       <div className="App">
@@ -47,6 +48,7 @@ function App() {
             <Route path="/payment-success/:id" element={<PaymentSuccess />} />
             <Route path="/add-new-feature" element={<AddFeaturesForm />} />
             <Route path='/employees-task' element={<EmployeesTask />} />
+            <Route path='/payment' element={<Payment />} />
           </Routes>
         </div>
       </div>

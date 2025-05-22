@@ -11,11 +11,9 @@ const PlanDetail = () => {
     const [planFeatures, setPlanFeatures] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [transactionRef, setTransactionRef] = useState('');
-    const [qrCodeUrl, setQrCodeUrl] = useState('');
     
-    // Merchant UPI details - replace with your actual details
-    const merchantUpiId = "mugeshkumar891999@oksbi";
+    // Updated Merchant UPI details
+    const merchantUpiId = "tamilkumaranm143-2@oksbi";
     const merchantName = "Rbtamilan";
 
     useEffect(() => {
@@ -58,21 +56,6 @@ const PlanDetail = () => {
 
         fetchPlanFeatures();
     }, [plan?.pid]);
-
-    // Generate QR code for UPI payment
-    const generateUpiQrCode = () => {
-        if (!plan?.new_price) return null;
-        
-        const amount = plan.new_price;
-        const note = `Payment for ${plan.plan_name}`;
-        const txnRef = transactionRef || `UPI_${Date.now()}`;
-        
-        // Generate QR code using UPI intent parameters
-        const upiUrl = `upi://pay?pa=${encodeURIComponent(merchantUpiId)}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}&tr=${encodeURIComponent(txnRef)}`;
-        
-        // Use a QR code generator API - this example uses QR Server API
-        return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
-    };
 
     const updatePaymentStatus = async (paymentDetails) => {
         if (!homeDataId) {
@@ -131,11 +114,6 @@ const PlanDetail = () => {
 
             // Create transaction reference
             const txnRef = `UPI_${Date.now()}`;
-            setTransactionRef(txnRef);
-
-            // Generate QR code URL
-            const qrUrl = generateUpiQrCode();
-            setQrCodeUrl(qrUrl);
 
             // First record the payment attempt in your system
             const paymentInitDetails = {
@@ -153,6 +131,18 @@ const PlanDetail = () => {
             localStorage.setItem('pendingHomeDataId', homeDataId);
 
             setLoading(false);
+
+            // Navigate to payment page with all necessary data
+            navigate('/payment', {
+                state: {
+                    plan,
+                    homeDataId,
+                    transactionRef: txnRef,
+                    merchantUpiId,
+                    merchantName,
+                    operatorData
+                }
+            });
 
         } catch (error) {
             console.error("Error initiating payment:", error);
@@ -196,26 +186,6 @@ const PlanDetail = () => {
         } else {
             alert("No pending transaction found.");
         }
-    };
-
-    // Function to copy UPI ID to clipboard
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                alert("UPI ID copied to clipboard!");
-            })
-            .catch(err => {
-                console.error('Failed to copy: ', err);
-                alert("Failed to copy. Please manually select and copy the UPI ID.");
-            });
-    };
-
-    // Function to open QR code in a new tab
-    const openQrCodeInNewTab = () => {
-        if (!qrCodeUrl) return;
-        
-        // Open the QR code in a new tab
-        window.open(qrCodeUrl, '_blank');
     };
 
     const getImageUrl = (filename) => {
@@ -355,103 +325,18 @@ const PlanDetail = () => {
                         </div>
                     </div>
 
-                    {/* UPI Payment Section */}
-                    {!qrCodeUrl ? (
-                        <div className="mt-4">
-                            <button
-                                className="btn btn-primary btn-block w-100 py-2"
-                                onClick={initiateUpiPayment}
-                                disabled={loading}
-                            >
-                                {loading ? 'Processing...' : 'Pay Now'}
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="card mt-4">
-                            <div className="card-body">
-                                <h5 className="text-center mb-3">Make Payment Using UPI</h5>
-                                
-                                {/* QR Code Section */}
-                                <div className="text-center mb-4">
-                                    <p className="fw-bold mb-2">Scan QR Code to Pay</p>
-                                    <div className="d-flex justify-content-center">
-                                        <img 
-                                            src={qrCodeUrl} 
-                                            alt="UPI QR Code" 
-                                            style={{width: "200px", height: "200px"}}
-                                            className="border p-2"
-                                        />
-                                    </div>
-                                    <button 
-                                        className="btn btn-sm btn-outline-primary mt-2" 
-                                        onClick={openQrCodeInNewTab}
-                                    >
-                                        <i className="bi bi-box-arrow-up-right me-1"></i> Open QR Code
-                                    </button>
-                                    <p className="text-muted mt-2 small">
-                                        Scan this QR code with any UPI app to pay
-                                    </p>
-                                </div>
-                                
-                                <div className="text-center">
-                                    <div className="mb-3">
-                                        <span className="fw-bold">Or pay using UPI ID:</span> 
-                                        <div className="d-flex align-items-center justify-content-center mt-2">
-                                            <input 
-                                                type="text" 
-                                                value={merchantUpiId} 
-                                                className="form-control text-center" 
-                                                readOnly 
-                                                style={{maxWidth: "250px", margin: "0 auto"}}
-                                            />
-                                            <button 
-                                                className="btn btn-sm btn-outline-primary ms-2" 
-                                                onClick={() => copyToClipboard(merchantUpiId)}
-                                            >
-                                                <i className="bi bi-clipboard"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mb-3">
-                                        <span className="fw-bold">Amount:</span> 
-                                        <div className="mt-1">₹{plan.new_price}</div>
-                                    </div>
-                                    
-                                    <div className="mb-3">
-                                        <span className="fw-bold">Transaction Reference:</span> 
-                                        <div className="mt-1">{transactionRef}</div>
-                                    </div>
-                                    
-                                    <hr />
-                                    
-                                    <div className="mb-3">
-                                        <p className="fw-bold">How to pay:</p>
-                                        <ol className="text-start">
-                                            <li>Open your UPI app (Google Pay, PhonePe, BHIM, etc.)</li>
-                                            <li>Scan the QR code above OR enter UPI ID manually</li>
-                                            <li>Enter amount: <span className="fw-bold">₹{plan.new_price}</span></li>
-                                            <li>In remarks/description, enter reference: <span className="fw-bold">{transactionRef}</span></li>
-                                            <li>Complete the payment</li>
-                                            <li>Click "I have completed payment" button below</li>
-                                        </ol>
-                                    </div>
-                                </div>
-                                
-                                <div className="d-grid gap-2">
-                                    <button
-                                        className="btn btn-success py-2"
-                                        onClick={verifyPayment}
-                                        disabled={loading}
-                                    >
-                                        {loading ? 'Verifying...' : 'I have completed payment'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Pay Now Button */}
+                    <div className="mt-4">
+                        <button
+                            className="btn btn-primary btn-block w-100 py-2"
+                            onClick={initiateUpiPayment}
+                            disabled={loading}
+                        >
+                            {loading ? 'Processing...' : 'Pay Now'}
+                        </button>
+                    </div>
                     
-                    {localStorage.getItem('pendingTransaction') && !qrCodeUrl && (
+                    {localStorage.getItem('pendingTransaction') && (
                         <button
                             className="btn btn-success btn-block w-100 mt-3 py-2"
                             onClick={verifyPayment}

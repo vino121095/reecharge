@@ -18,7 +18,7 @@ const UserList = () => {
   const [newStatus, setNewStatus] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
   const [userRole, setUserRole] = useState('');
-  const [showRechargeOnly, setShowRechargeOnly] = useState(false);
+  const [showScreenshotOnly, setShowScreenshotOnly] = useState(false); // Changed variable name
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [assignedToMe, setAssignedToMe] = useState(0);
@@ -90,7 +90,9 @@ const UserList = () => {
         hasPrice: user.amount && parseFloat(user.amount) > 0,
         old_price: user.old_price || 0,
         // Format screenshot path correctly
-        screenshot_url: formatImagePath(user.screenshot_url || user.screenshot_path || null)
+        screenshot_url: formatImagePath(user.screenshot_url || user.screenshot_path || null),
+        // Add flag to check if user has uploaded screenshot
+        hasScreenshot: !!(user.screenshot_url || user.screenshot_path)
       }));
 
       setOperators(processedData);
@@ -236,8 +238,9 @@ const UserList = () => {
     setImagePreviewUrl(null);
   };
 
-  const toggleRechargeDisplay = () => {
-    setShowRechargeOnly(!showRechargeOnly);
+  // Updated toggle function to filter by screenshot
+  const toggleScreenshotDisplay = () => {
+    setShowScreenshotOnly(!showScreenshotOnly);
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
@@ -274,7 +277,7 @@ const UserList = () => {
     }
   };
 
-  // Filter and sort logic
+  // Updated filter logic to filter by screenshot instead of price
   const filteredUsers = operators.filter((user) => {
     // Text search filter
     const searchableFields = [
@@ -287,10 +290,10 @@ const UserList = () => {
       field.includes(searchTerm.toLowerCase())
     );
     
-    // Price filter (only apply if toggle is ON)
-    const matchesPriceFilter = showRechargeOnly ? user.hasPrice : true;
+    // Screenshot filter (only apply if toggle is ON)
+    const matchesScreenshotFilter = showScreenshotOnly ? user.hasScreenshot : true;
     
-    return matchesSearch && matchesPriceFilter;
+    return matchesSearch && matchesScreenshotFilter;
   });
 
   const sortedUsers = filteredUsers.sort((a, b) => {
@@ -357,17 +360,17 @@ const UserList = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="col-md-3">
+              <div className="col-md-4">
                 <div className="form-check form-switch">
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    id="toggleRecharge"
-                    checked={showRechargeOnly}
-                    onChange={toggleRechargeDisplay}
+                    id="toggleScreenshot"
+                    checked={showScreenshotOnly}
+                    onChange={toggleScreenshotDisplay}
                   />
-                  <label className="form-check-label" htmlFor="toggleRecharge">
-                    {showRechargeOnly ? "Showing items with recharge price only" : "Showing all items"}
+                  <label className="form-check-label" htmlFor="toggleScreenshot">
+                    {showScreenshotOnly ? "Showing items with screenshots only" : "Showing all items"}
                   </label>
                 </div>
               </div>
@@ -388,15 +391,16 @@ const UserList = () => {
               </div>
             </div>
 
-            {/* Stats Summary */}
+            {/* Updated Stats Summary */}
             <div className="row mb-3">
               <div className="col-md-12">
                 <div className="alert alert-info py-2">
                   <div className="d-flex justify-content-between flex-wrap">
                     <span><strong>Total Records:</strong> {totalRecords}</span>
                     <span><strong>Filtered Records:</strong> {totalItems}</span>
+                    <span><strong>Records with Screenshots:</strong> {operators.filter(op => op.hasScreenshot).length}</span>
+                    <span><strong>Records without Screenshots:</strong> {operators.filter(op => !op.hasScreenshot).length}</span>
                     <span><strong>Records with Price:</strong> {operators.filter(op => op.hasPrice).length}</span>
-                    <span><strong>Records without Price:</strong> {operators.filter(op => !op.hasPrice).length}</span>
                   </div>
                 </div>
               </div>
@@ -443,7 +447,7 @@ const UserList = () => {
                     </tr>
                   ) : (
                     currentItems.map((user, index) => (
-                      <tr key={user.id} className={user.hasPrice ? "" : "table-light"}>
+                      <tr key={user.id} className={user.hasScreenshot ? "table-success" : "table-light"}>
                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td>{user.username}</td>
                         <td>{user.mobile_number}</td>
@@ -464,7 +468,11 @@ const UserList = () => {
                             <span className="text-muted">No image</span>
                           )}
                         </td>
-                        <td>{user.status}</td>
+                        <td>
+                        
+                            {user.status}
+                         
+                        </td>
                         <td>
                           <button
                             className="btn btn-link p-0 me-2"
@@ -578,7 +586,10 @@ const UserList = () => {
                         </tr>
                         <tr>
                           <th>Status</th>
-                          <td>{viewUser.status}</td>
+                          <td>
+                              {viewUser.status}
+
+                          </td>
                         </tr>
                         <tr>
                           <th>Payment Date</th>
