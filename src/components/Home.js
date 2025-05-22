@@ -23,10 +23,10 @@ const Home = () => {
         if (response.ok) {
           setOperatorsList(data);
         } else {
-          console.error("Error fetching operators:", data);
+          console.error("Error fetching operators:");
         }
       } catch (error) {
-        console.error("Fetch Error:", error);
+        console.error("Fetch Error:");
       }
     };
 
