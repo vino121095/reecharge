@@ -146,69 +146,137 @@ const SignIn = () => {
     };
  
     return (
-        <div className="container">
-            <div className="row justify-content-center align-items-center vh-100">
-                <div className="col-md-5">
-                    <div className="card" id="signcard">
-                        <div className="card-header text-center">
-                            <h4>Sign In</h4>
+        <div style={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+        }}>
+            <div className="container">
+                <div className="row justify-content-center">
+                    <div className="col-12 col-md-6 col-lg-4">
+                        {/* Site Header */}
+                        <div className="text-center mb-4">
+                            <div style={{
+                                background: 'white',
+                                borderRadius: '50%',
+                                width: '80px',
+                                height: '80px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 20px',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                            }}>
+                                <span style={{fontSize: '24px'}}>📱</span>
+                            </div>
+                            <h1 className="display-5 fw-bold text-white mb-2">Rbtamilan</h1>
+                            <p className="text-white-50 mb-0">Mobile Recharge Made Easy</p>
                         </div>
-                        <div className="card-body">
-                            {error && (
-                                <div className="alert alert-danger" role="alert">
-                                    {error}
-                                </div>
-                            )}
-                            <form onSubmit={handleSubmit}>
-                                <div className="form-group">
-                                    <label htmlFor="email">Email address</label>
-                                    <input
-                                        type="email"
-                                        className="form-control mt-2"
-                                        id="email"
-                                        placeholder="Enter email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group mt-4 position-relative">
-                                    <label htmlFor="password">Password</label>
-                                    <input
-                                        type={passwordVisible ? 'text' : 'password'}
-                                        className="form-control mt-2"
-                                        id="password"
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                    <span className='mt-3'
-                                        onClick={togglePasswordVisibility}
+                        
+                        <div className="card shadow-lg border-0" style={{borderRadius: '20px'}}>
+                            <div className="card-header text-center border-0 bg-transparent pt-4">
+                                <h4 className="mb-0 fw-bold text-dark">Welcome Back</h4>
+                                <p className="text-muted mt-2 mb-0">Sign in to recharge your mobile</p>
+                            </div>
+                            <div className="card-body px-4 pb-4">
+                                {error && (
+                                    <div className="alert alert-danger border-0" role="alert" style={{
+                                        borderRadius: '12px',
+                                        backgroundColor: '#fee2e2',
+                                        color: '#dc2626',
+                                        border: 'none'
+                                    }}>
+                                        <i className="fas fa-exclamation-circle me-2"></i>
+                                        {error}
+                                    </div>
+                                )}
+                                <form onSubmit={handleSubmit}>
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="email" className="form-label fw-semibold text-dark mb-2">
+                                            📧 Email Address
+                                        </label>
+                                        <input
+                                            type="email"
+                                            className="form-control py-3"
+                                            id="email"
+                                            placeholder="Enter your email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            style={{
+                                                borderRadius: '12px',
+                                                border: '2px solid #e5e7eb',
+                                                fontSize: '16px'
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="form-group mb-4 position-relative">
+                                        <label htmlFor="password" className="form-label fw-semibold text-dark mb-2">
+                                            🔒 Password
+                                        </label>
+                                        <input
+                                            type={passwordVisible ? 'text' : 'password'}
+                                            className="form-control py-3"
+                                            id="password"
+                                            placeholder="Enter your password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            style={{
+                                                borderRadius: '12px',
+                                                border: '2px solid #e5e7eb',
+                                                fontSize: '16px',
+                                                paddingRight: '50px'
+                                            }}
+                                        />
+                                        <span
+                                            onClick={togglePasswordVisibility}
+                                            style={{
+                                                position: 'absolute',
+                                                top: '70%',
+                                                right: '15px',
+                                                transform: 'translateY(-50%)',
+                                                cursor: 'pointer',
+                                                color: '#6b7280'
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={passwordVisible ? faEyeSlash : faEye} />
+                                        </span>
+                                    </div>
+     
+                                    <button 
+                                        type="submit" 
+                                        className="btn w-100 py-3 fw-bold"
                                         style={{
-                                            position: 'absolute',
-                                            top: '50%',
-                                            right: '10px',
-                                            transform: 'translateY(-50%)',
-                                            cursor: 'pointer'
+                                            background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            color: 'white',
+                                            fontSize: '16px',
+                                            transition: 'transform 0.2s'
                                         }}
+                                        onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                                        onMouseOut={(e) => e.target.style.transform = 'translateY(0px)'}
                                     >
-                                        <FontAwesomeIcon icon={passwordVisible ? faEyeSlash : faEye} />
-                                    </span>
+                                        🚀 Sign In to Recharge
+                                    </button>
+                                </form>
+                                
+                                <div className="text-center mt-4 pt-3" style={{borderTop: '1px solid #e5e7eb'}}>
+                                    <p className="mb-0 text-muted">
+                                        New to mobile recharge? {' '}
+                                        <a href="/signup" className="fw-bold" style={{
+                                            color: '#0D6EFD',
+                                            textDecoration: 'none'
+                                        }}>
+                                            Create Account
+                                        </a>
+                                    </p>
                                 </div>
-                                <div className="mt-4">
-                                    {/* <a href="#">Forgot your password?</a> */}
-                                </div>
- 
-                                <button type="submit" className="btn btn-primary btn-block mt-4 w-100">
-                                    Sign In
-                                </button>
-                            </form>
-                        </div>
-                        <div className="card-footer text-center">
-                            <p>
-                                Don't have an account? <a href="/signup">Signup</a>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>

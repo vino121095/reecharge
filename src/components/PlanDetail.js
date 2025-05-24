@@ -248,107 +248,141 @@ const PlanDetail = () => {
     }
 
     return (
-        <div className="container">
-            <div className="row justify-content-center text-align-center align-items-center vh-100">
-                <div className="col-md-5">
-                    <i
-                        className="bi bi-arrow-left"
-                        style={{
-                            cursor: 'pointer',
-                            marginRight: '30px',
-                            marginBottom: '10px',
-                            fontSize: '20px',
-                        }}
-                        onClick={() => navigate(-1)}
-                        aria-label="Go back"
-                    ></i>
-                    <h4 className="text-center mb-4">Payment</h4>
+        <div>
+            {/* Header */}
+            <div 
+                style={{
+                    background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                    color: 'white',
+                    padding: '15px 0',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                }}
+            >
+                <div className="container">
+                    <div className="d-flex align-items-center">
+                        <i
+                            className="bi bi-arrow-left me-3"
+                            style={{
+                                cursor: 'pointer',
+                                fontSize: '20px',
+                            }}
+                            onClick={() => navigate(-1)}
+                            aria-label="Go back"
+                        ></i>
+                        <h4 className="mb-0 fw-bold">Rbtamilan Recharge</h4>
+                    </div>
+                </div>
+            </div>
 
-                    {operatorData && (
-                        <div className="text-center">
-                            <img
-                                src={getImageUrl(operatorData.image)}
-                                alt={operatorData.operator}
-                                style={{ width: '100px', height: 'auto' }}
-                                onError={(e) => {
-                                    e.target.src = '/assets/icons/operator-default.png';
-                                    e.target.onerror = null;
+            {/* Main Content */}
+            <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
+                <div className="row justify-content-center">
+                    <div className="col-md-5">
+                        <h5 className="text-center mb-4">Payment Details</h5>
+
+                        {operatorData && (
+                            <div className="text-center mb-4">
+                                <img
+                                    src={getImageUrl(operatorData.image)}
+                                    alt={operatorData.operator}
+                                    style={{ width: '100px', height: 'auto' }}
+                                    onError={(e) => {
+                                        e.target.src = '/assets/icons/operator-default.png';
+                                        e.target.onerror = null;
+                                    }}
+                                />
+                                <h5 className="mt-3">{operatorData.operator}</h5>
+                            </div>
+                        )}
+
+                        <h2 className="text-center mt-4">
+                            <span>₹</span>{plan.new_price}
+                        </h2>
+                        <p className="text-danger text-decoration-line-through text-center">
+                            ₹{plan.old_price}
+                        </p>
+
+                        <div className="card mt-4">
+                            <div className="card-body">
+                                <h5>Plan Details:</h5>
+                                <p>Data: {plan.data} GB/Day</p>
+                                <p>Calls: {plan.cells} Calls</p>
+                                <p className="mb-2">Validity: {plan.validity} Days</p>
+                            </div>
+                        </div>
+
+                        <div className="card mt-3">
+                            <div className="card-body">
+                                <h5>Extra Benefits:</h5>
+                                {planFeatures.length > 0 ? (
+                                    <div>
+                                        {planFeatures.map((feature, index) => (
+                                            <div key={index} className="d-flex align-items-center mb-2">
+                                                {feature.Feature?.image_path && (
+                                                    <img 
+                                                        src={buildImageUrl(feature.Feature.image_path)} 
+                                                        alt={feature.Feature.feature_name || 'Feature'}
+                                                        style={{ 
+                                                            width: '24px', 
+                                                            height: '24px', 
+                                                            marginRight: '10px',
+                                                            objectFit: 'contain'
+                                                        }}
+                                                        onError={(e) => handleImageError(e, '/assets/icons/feature-default.png')}
+                                                    />
+                                                )}
+                                                <span style={{fontSize: '16px'}}>{feature.Feature?.feature_name || 'Additional Feature'}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="mb-2">{plan.extra_features || 'No additional features'}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Pay Now Button */}
+                        <div className="mt-4">
+                            <button
+                                className="btn btn-primary btn-block w-100 py-2"
+                                onClick={initiateUpiPayment}
+                                disabled={loading}
+                                style={{
+                                    background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold'
                                 }}
-                            />
-                            <h5 className="mt-3">{operatorData.operator}</h5>
+                            >
+                                {loading ? 'Processing...' : 'Pay Now'}
+                            </button>
                         </div>
-                    )}
-
-                    <h2 className="text-center mt-4">
-                        <span>₹</span>{plan.new_price}
-                    </h2>
-                    <p className="text-danger text-decoration-line-through text-center">
-                        ₹{plan.old_price}
-                    </p>
-
-                    <div className="card mt-5">
-                        <div className="card-body">
-                            <h5>Plan Details:</h5>
-                            <p>Data: {plan.data} GB/Day</p>
-                            <p>Calls: {plan.cells} Calls</p>
-                            <p className="mb-2">Validity: {plan.validity} Days</p>
-                        </div>
+                        
+                        {localStorage.getItem('pendingTransaction') && (
+                            <button
+                                className="btn btn-success btn-block w-100 mt-3 py-2"
+                                onClick={verifyPayment}
+                                disabled={loading}
+                                style={{
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {loading ? 'Verifying...' : 'I have completed payment'}
+                            </button>
+                        )}
+                        
+                        <p style={{textAlign: "center"}} className="mt-4">
+                            <a href="/contact" style={{ color: '#0D6EFD', textDecoration: 'none' }}>Contact Us</a>
+                        </p>
                     </div>
-
-                    <div className="card mt-3">
-                        <div className="card-body">
-                            <h5>Extra Benefits:</h5>
-                            {planFeatures.length > 0 ? (
-                                <div>
-                                    {planFeatures.map((feature, index) => (
-                                        <div key={index} className="d-flex align-items-center mb-2">
-                                            {feature.Feature?.image_path && (
-                                                <img 
-                                                    src={buildImageUrl(feature.Feature.image_path)} 
-                                                    alt={feature.Feature.feature_name || 'Feature'}
-                                                    style={{ 
-                                                        width: '24px', 
-                                                        height: '24px', 
-                                                        marginRight: '10px',
-                                                        objectFit: 'contain'
-                                                    }}
-                                                    onError={(e) => handleImageError(e, '/assets/icons/feature-default.png')}
-                                                />
-                                            )}
-                                            <span style={{fontSize: '16px'}}>{feature.Feature?.feature_name || 'Additional Feature'}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="mb-2">{plan.extra_features || 'No additional features'}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Pay Now Button */}
-                    <div className="mt-4">
-                        <button
-                            className="btn btn-primary btn-block w-100 py-2"
-                            onClick={initiateUpiPayment}
-                            disabled={loading}
-                        >
-                            {loading ? 'Processing...' : 'Pay Now'}
-                        </button>
-                    </div>
-                    
-                    {localStorage.getItem('pendingTransaction') && (
-                        <button
-                            className="btn btn-success btn-block w-100 mt-3 py-2"
-                            onClick={verifyPayment}
-                            disabled={loading}
-                        >
-                            {loading ? 'Verifying...' : 'I have completed payment'}
-                        </button>
-                    )}
-                    
-                    <p style={{textAlign: "center"}} className="mt-4">
-                        <a href="/contact">Contact Us</a>
-                    </p>
                 </div>
             </div>
         </div>

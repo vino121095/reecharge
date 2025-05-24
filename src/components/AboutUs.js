@@ -24,7 +24,7 @@ const AboutUs = () => {
           <div className="col-12">
             <h1 className="display-4 fw-bold mb-4">Who We Are</h1>
             <p className="lead text-secondary mb-4">
-              Welcome to [Your Company Name], your one-stop destination for seamless e-commerce, 
+              Welcome to Rbtamilan, your one-stop destination for seamless e-commerce, 
               expert consultancy for college students, and exclusive mobile recharge offers. 
               We are a dynamic platform built to serve a diverse audience, ensuring convenience, 
               savings, and expert guidance—all in one place!

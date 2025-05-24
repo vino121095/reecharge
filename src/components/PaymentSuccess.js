@@ -101,7 +101,7 @@ const PaymentSuccess = () => {
             
             setUploadStatus({
                 type: 'success',
-                message: 'Screenshot uploaded successfully!'
+                message: 'Screenshot uploaded successfully! Redirecting to recharge history...'
             });
             
             // Set flag that a screenshot exists
@@ -113,6 +113,11 @@ const PaymentSuccess = () => {
             // Clear the file input
             setFile(null);
             document.getElementById('screenshotUpload').value = '';
+            
+            // Redirect to recharge history after successful upload
+            setTimeout(() => {
+                navigate('/recharge-history');
+            }, 2000);
             
         } catch (err) {
             console.error('Error uploading screenshot:', err);
@@ -127,9 +132,32 @@ const PaymentSuccess = () => {
 
     if (loading) {
         return (
-            <div className="min-vh-100 d-flex justify-content-center align-items-center">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+            <div>
+                {/* Header */}
+                <div 
+                    style={{
+                        background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                        color: 'white',
+                        padding: '15px 0',
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <div className="container">
+                        <div className="d-flex align-items-center">
+                            <h4 className="mb-0 fw-bold">Rbtamilan Recharge</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="min-vh-100 d-flex justify-content-center align-items-center" style={{ paddingTop: '80px' }}>
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
                 </div>
             </div>
         );
@@ -137,9 +165,41 @@ const PaymentSuccess = () => {
 
     if (error) {
         return (
-            <div className="container min-vh-100 d-flex justify-content-center align-items-center">
-                <div className="alert alert-danger" role="alert">
-                    {error}
+            <div>
+                {/* Header */}
+                <div 
+                    style={{
+                        background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                        color: 'white',
+                        padding: '15px 0',
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <div className="container">
+                        <div className="d-flex align-items-center">
+                            <i
+                                className="bi bi-arrow-left me-3"
+                                style={{
+                                    cursor: 'pointer',
+                                    fontSize: '20px',
+                                }}
+                                onClick={() => navigate('/home')}
+                                aria-label="Go back"
+                            ></i>
+                            <h4 className="mb-0 fw-bold">Rbtamilan Recharge</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container min-vh-100 d-flex justify-content-center align-items-center" style={{ paddingTop: '80px' }}>
+                    <div className="alert alert-danger" role="alert">
+                        {error}
+                    </div>
                 </div>
             </div>
         );
@@ -147,9 +207,41 @@ const PaymentSuccess = () => {
 
     if (!paymentData) {
         return (
-            <div className="container min-vh-100 d-flex justify-content-center align-items-center">
-                <div className="alert alert-warning" role="alert">
-                    No payment data found
+            <div>
+                {/* Header */}
+                <div 
+                    style={{
+                        background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                        color: 'white',
+                        padding: '15px 0',
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <div className="container">
+                        <div className="d-flex align-items-center">
+                            <i
+                                className="bi bi-arrow-left me-3"
+                                style={{
+                                    cursor: 'pointer',
+                                    fontSize: '20px',
+                                }}
+                                onClick={() => navigate('/home')}
+                                aria-label="Go back"
+                            ></i>
+                            <h4 className="mb-0 fw-bold">Rbtamilan Recharge</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container min-vh-100 d-flex justify-content-center align-items-center" style={{ paddingTop: '80px' }}>
+                    <div className="alert alert-warning" role="alert">
+                        No payment data found
+                    </div>
                 </div>
             </div>
         );
@@ -170,159 +262,211 @@ const PaymentSuccess = () => {
     };
 
     return (
-        <div className="container py-5">
-            <div className="row justify-content-center">
-                <div className="col-12 col-md-8 col-lg-6">
-                    <div className="d-grid gap-2 mt-4">
-                        <button 
-                            className="btn btn-primary w-25"
+        <div>
+            {/* Header */}
+            <div 
+                style={{
+                    background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                    color: 'white',
+                    padding: '15px 0',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                }}
+            >
+                <div className="container">
+                    <div className="d-flex align-items-center">
+                        <i
+                            className="bi bi-arrow-left me-3"
+                            style={{
+                                cursor: 'pointer',
+                                fontSize: '20px',
+                            }}
                             onClick={() => navigate('/home')}
-                        >
-                            <i className="bi-arrow-left me-2"></i>
-                            Back
-                        </button>
+                            aria-label="Go back"
+                        ></i>
+                        <h4 className="mb-0 fw-bold">Rbtamilan Recharge</h4>
                     </div>
-                    {/* Success Header */}
-                    <div className="text-center mb-4">
-                        <div className="display-1 text-success mb-3">
-                            <i className="bi bi-check-circle-fill"></i>
-                        </div>
-                        <h1 className="h3 mb-3">Recharge Successful!</h1>
-                        <p className="text-muted">Your mobile recharge has been completed successfully</p>
-                    </div>
+                </div>
+            </div>
 
-                    {/* Recharge Details Card */}
-                    <div className="card shadow-sm">
-                        <div className="card-header bg-light">
-                            <h5 className="mb-0">Recharge Details</h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="row g-3">
-                                <div className="col-12">
-                                    <div className="d-flex justify-content-between align-items-center py-2">
-                                        <span className="text-muted">Customer Name</span>
-                                        <span className="fw-bold">{paymentData.username}</span>
-                                    </div>
-                                </div>
-
-                                <div className="col-12">
-                                    <div className="d-flex justify-content-between align-items-center py-2">
-                                        <span className="text-muted">Mobile Number</span>
-                                        <span className="fw-bold">{formatMobile(paymentData.mobile_number)}</span>
-                                    </div>
-                                </div>
-
-                                <div className="col-12">
-                                    <div className="d-flex justify-content-between align-items-center py-2">
-                                        <span className="text-muted">Operator</span>
-                                        <span className="fw-bold">{paymentData.operator}</span>
-                                    </div>
-                                </div>
-
-                                <div className="col-12">
-                                    <div className="d-flex justify-content-between align-items-center py-2">
-                                        <span className="text-muted">Plan Type</span>
-                                        <span className="fw-bold text-capitalize">{paymentData.plan_type}</span>
-                                    </div>
-                                </div>
-
-                                <div className="col-12">
-                                    <div className="d-flex justify-content-between align-items-center py-2">
-                                        <span className="text-muted">Amount</span>
-                                        <span className="fw-bold">₹{paymentData.amount}</span>
-                                    </div>
-                                </div>
-
-                                <div className="col-12">
-                                    <div className="d-flex justify-content-between align-items-center py-2">
-                                        <span className="text-muted">Date & Time</span>
-                                        <span className="fw-bold">{formatDate(paymentData.payment_date)}</span>
-                                    </div>
-                                </div>
+            {/* Main Content */}
+            <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
+                <div className="row justify-content-center">
+                    <div className="col-12 col-md-8 col-lg-6">
+                        {/* Success Header */}
+                        <div className="text-center mb-4">
+                            <div className="display-1 text-success mb-3">
+                                <i className="bi bi-check-circle-fill"></i>
                             </div>
+                            <h1 className="h3 mb-3">Recharge Successful!</h1>
+                            <p className="text-muted">Your mobile recharge has been completed successfully</p>
                         </div>
-                    </div>
 
-                    {/* Screenshot Upload Card */}
-                    <div className="card shadow-sm mt-4">
-                        <div className="card-header bg-light">
-                            <h5 className="mb-0">Save Your Receipt</h5>
-                        </div>
-                        <div className="card-body">
-                            {uploadStatus && (
-                                <div className={`alert alert-${uploadStatus.type} alert-dismissible fade show`} role="alert">
-                                    {uploadStatus.message}
-                                    <button type="button" className="btn-close" onClick={() => setUploadStatus(null)} aria-label="Close"></button>
-                                </div>
-                            )}
-                            
-                            <div className="mb-3">
-                                <p className="text-muted mb-3">
-                                    {screenshotExists 
-                                        ? "You've already uploaded a screenshot. You can view it below or upload a new one."
-                                        : "Take a screenshot of this page and upload it for your records"}
-                                </p>
-                                
-                                <form onSubmit={handleUpload}>
-                                    <div className="input-group mb-3">
-                                        <input 
-                                            type="file" 
-                                            className="form-control" 
-                                            id="screenshotUpload" 
-                                            accept="image/*"
-                                            onChange={handleFileChange}
-                                        />
-                                        <button 
-                                            className="btn btn-primary" 
-                                            type="submit"
-                                            disabled={!file || uploading}
-                                        >
-                                            {uploading ? (
-                                                <>
-                                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                    Uploading...
-                                                </>
-                                            ) : (
-                                                screenshotExists && !file ? 'Upload New' : 'Upload'
-                                            )}
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="text-muted small mb-3">
-                                        <p className="mb-0">
-                                            <i className="bi bi-info-circle me-1"></i>
-                                            Only image files are accepted. Maximum file size: 5MB
-                                        </p>
-                                    </div>
-                                    
-                                    {/* Image Preview */}
-                                    {previewUrl && (
-                                        <div className="text-center mt-3">
-                                            <p className="fw-bold mb-2">
-                                                {screenshotExists && !file ? 'Your Uploaded Receipt' : 'Preview'}
-                                            </p>
-                                            <div className="border p-2 mb-3">
-                                                <img 
-                                                    src={previewUrl} 
-                                                    alt="Receipt Preview" 
-                                                    className="img-fluid" 
-                                                    style={{ maxHeight: '300px' }}
-                                                />
-                                            </div>
+                        {/* Recharge Details Card */}
+                        <div className="card shadow-sm">
+                            <div className="card-header bg-light">
+                                <h5 className="mb-0">Recharge Details</h5>
+                            </div>
+                            <div className="card-body">
+                                <div className="row g-3">
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Customer Name</span>
+                                            <span className="fw-bold">{paymentData.username}</span>
                                         </div>
-                                    )}
-                                </form>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Mobile Number</span>
+                                            <span className="fw-bold">{formatMobile(paymentData.mobile_number)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Operator</span>
+                                            <span className="fw-bold">{paymentData.operator}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Plan Type</span>
+                                            <span className="fw-bold text-capitalize">{paymentData.plan_type}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Amount</span>
+                                            <span className="fw-bold">₹{paymentData.amount}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Date & Time</span>
+                                            <span className="fw-bold">{formatDate(paymentData.payment_date)}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    {/* Support Section */}
-                    <div className="text-center mt-4">
-                        <p className="text-muted mb-1">Need help with your recharge?</p>
-                        <a href="/contact" className="btn btn-link text-decoration-none">
-                            <i className="bi bi-headset me-2"></i>
-                            Contact Support
-                        </a>
+
+                        {/* Screenshot Upload Card */}
+                        <div className="card shadow-sm mt-4">
+                            <div className="card-header bg-light">
+                                <h5 className="mb-0">Save Your Receipt</h5>
+                            </div>
+                            <div className="card-body">
+                                {uploadStatus && (
+                                    <div className={`alert alert-${uploadStatus.type} alert-dismissible fade show`} role="alert">
+                                        {uploadStatus.message}
+                                        <button type="button" className="btn-close" onClick={() => setUploadStatus(null)} aria-label="Close"></button>
+                                    </div>
+                                )}
+                                
+                                <div className="mb-3">
+                                    <p className="text-muted mb-3">
+                                        {screenshotExists 
+                                            ? "You've already uploaded a screenshot. You can view it below or upload a new one."
+                                            : "Take a screenshot of this page and upload it for your records"}
+                                    </p>
+                                    
+                                    <form onSubmit={handleUpload}>
+                                        <div className="input-group mb-3">
+                                            <input 
+                                                type="file" 
+                                                className="form-control" 
+                                                id="screenshotUpload" 
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                            />
+                                            <button 
+                                                className="btn btn-primary" 
+                                                type="submit"
+                                                disabled={!file || uploading}
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                                                    border: 'none'
+                                                }}
+                                            >
+                                                {uploading ? (
+                                                    <>
+                                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                        Uploading...
+                                                    </>
+                                                ) : (
+                                                    screenshotExists && !file ? 'Upload New' : 'Upload'
+                                                )}
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="text-muted small mb-3">
+                                            <p className="mb-0">
+                                                <i className="bi bi-info-circle me-1"></i>
+                                                Only image files are accepted. Maximum file size: 5MB
+                                            </p>
+                                        </div>
+                                        
+                                        {/* Image Preview */}
+                                        {previewUrl && (
+                                            <div className="text-center mt-3">
+                                                <p className="fw-bold mb-2">
+                                                    {screenshotExists && !file ? 'Your Uploaded Receipt' : 'Preview'}
+                                                </p>
+                                                <div className="border p-2 mb-3">
+                                                    <img 
+                                                        src={previewUrl} 
+                                                        alt="Receipt Preview" 
+                                                        className="img-fluid" 
+                                                        style={{ maxHeight: '300px' }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="d-grid gap-2 mt-4">
+                            <button 
+                                className="btn btn-outline-primary"
+                                onClick={() => navigate('/recharge-history')}
+                                style={{ borderRadius: '8px' }}
+                            >
+                                <i className="bi bi-clock-history me-2"></i>
+                                View Recharge History
+                            </button>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => navigate('/home')}
+                                style={{
+                                    background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                                    border: 'none',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                <i className="bi bi-plus-circle me-2"></i>
+                                Make Another Recharge
+                            </button>
+                        </div>
+                        
+                        {/* Support Section */}
+                        <div className="text-center mt-4">
+                            <p className="text-muted mb-1">Need help with your recharge?</p>
+                            <a href="/contact" className="btn btn-link text-decoration-none" style={{ color: '#0D6EFD' }}>
+                                <i className="bi bi-headset me-2"></i>
+                                Contact Support
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

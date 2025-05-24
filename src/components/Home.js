@@ -13,6 +13,7 @@ const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [loggedInUserName, setLoggedInUserName] = useState(""); // New state for logged-in user name
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +31,36 @@ const Home = () => {
       }
     };
 
+    // Get logged-in user's name from localStorage
+    const getUserName = () => {
+      try {
+        const userData = localStorage.getItem("userData");
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          // Try different possible name fields
+          const displayName = parsedUserData.name || 
+                             parsedUserData.username || 
+                             parsedUserData.firstName || 
+                             parsedUserData.email?.split('@')[0] || 
+                             "User";
+          setLoggedInUserName(displayName);
+        } else {
+          // Fallback: try to get email from localStorage if userData is not available
+          const email = localStorage.getItem("email");
+          if (email) {
+            setLoggedInUserName(email.split('@')[0]);
+          } else {
+            setLoggedInUserName("User");
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setLoggedInUserName("User");
+      }
+    };
+
     fetchOperators();
+    getUserName(); // Call the function to get user name
 
     const handleResize = () => {
       setSidebarOpen(window.innerWidth >= 992);
@@ -109,9 +139,27 @@ const Home = () => {
           >
             <span className="navbar-toggler-icon"></span>
           </button>
-          <a className="navbar-brand" href="#">
-            Mobile Recharge
+          <a className="navbar-brand fw-bold" href="#">
+            Rbtamilan
           </a>
+          
+          {/* User greeting section - responsive */}
+          <div className="navbar-nav ms-auto">
+            <span className="navbar-text text-white d-flex align-items-center">
+              <i className="bi bi-person-circle me-1" style={{ fontSize: "1rem" }}></i>
+              {/* Show full greeting on larger screens, just name on mobile */}
+              <span className="d-none d-md-inline">Welcome, </span>
+              <span style={{ 
+                maxWidth: "120px", 
+                overflow: "hidden", 
+                textOverflow: "ellipsis", 
+                whiteSpace: "nowrap", 
+                fontSize: "1rem"
+              }}>
+                {loggedInUserName}
+              </span>
+            </span>
+          </div>
         </div>
       </nav>
 
@@ -133,6 +181,20 @@ const Home = () => {
         }}
       >
         <div className="px-4 pb-4">
+          {/* User info section in sidebar */}
+          <div className="mb-4 p-3 rounded" style={{ backgroundColor: "#f8f9fa", border: "1px solid #e9ecef" }}>
+            <div className="d-flex align-items-center">
+              <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                   style={{ width: "40px", height: "40px" }}>
+                <i className="bi bi-person-fill text-white"></i>
+              </div>
+              <div>
+                <h6 className="mb-0 fw-bold">{loggedInUserName}</h6>
+                <small className="text-muted">Logged in</small>
+              </div>
+            </div>
+          </div>
+
           <h5 className="text-muted mb-3" style={{ fontSize: "0.85rem", letterSpacing: "1px" }}>
             MAIN MENU
           </h5>
