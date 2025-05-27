@@ -4,19 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import baseurl from '../Api Service/ApiService';
- 
- 
+
 const SignIn = () => {
- 
-    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
- 
+
     const handleSubmit = async (e) => {
-        e.preventDefault();  // Prevent page refresh on form submit
-        setError(""); // Clear any previous errors
- 
+        e.preventDefault();
+        setError("");
+
         try {
             const response = await fetch(`${baseurl}/api/login`, {
                 method: 'POST',
@@ -24,11 +22,11 @@ const SignIn = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: email,
+                    phone: phone,
                     password: password
                 }),
             });
- 
+
             const data = await response.json();
             console.log(data);
             
@@ -45,34 +43,30 @@ const SignIn = () => {
                 // Determine which user data to store
                 let userData;
                 let userId = null;
-                let phone = null;
+                let userPhone = null;
                 
                 if (data.user) {
                     userData = data.user;
                     userId = data.user.id || data.user._id || data.user.userId || data.user.uid;
-                    phone = data.user.phone;
+                    userPhone = data.user.phone;
                 } else if (data.userData) {
                     userData = data.userData;
                     userId = data.userData.id || data.userData._id || data.userData.userId || data.userData.uid;
-                    phone = data.userData.phone;
+                    userPhone = data.userData.phone;
                 } else if (data.userInfo) {
                     userData = data.userInfo;
                     userId = data.userInfo.id || data.userInfo._id || data.userInfo.userId || data.userInfo.uid;
-                    phone = data.userInfo.phone;
+                    userPhone = data.userInfo.phone;
                 } else if (data.data && data.data.user) {
                     userData = data.data.user;
                     userId = data.data.user.id || data.data.user._id || data.data.user.userId || data.data.user.uid;
-                    phone = data.data.user.phone;
+                    userPhone = data.data.user.phone;
                 } else {
-                    // If no recognized user object, use the direct data
-                    // Prioritize 'id' over 'uid' if both exist
                     userId = data.id || data._id || data.userId || data.uid || data.userid;
-                    phone = data.phone;
+                    userPhone = data.phone;
                     
-                    // Create a userData object with available information, but avoid redundancy
                     userData = {
-                        email: email,
-                        // Use only one ID field (prioritize 'id')
+                        phone: phone,
                         id: userId,
                         ...(data.name && { name: data.name }),
                         ...(data.role && { role: data.role }),
@@ -80,14 +74,12 @@ const SignIn = () => {
                     };
                 }
                 
-                // Ensure we have some form of user ID
                 if (!userId && data.userid) {
                     userId = data.userid;
                 }
                 
                 if (!userId) {
                     console.warn("Warning: Could not determine user ID from response");
-                    // As a last resort, extract any property that looks like an ID
                     for (const key in data) {
                         if (key.toLowerCase().includes('id') && data[key]) {
                             userId = data[key];
@@ -96,55 +88,51 @@ const SignIn = () => {
                     }
                 }
                 
-                // Make sure user ID is explicitly stored with consistent key name
                 if (userId) {
                     localStorage.setItem("userId", userId.toString());
-                    // Ensure it's in the userData object with just one ID field
                     userData.id = userId;
-                    // Remove any redundant ID fields
                     if ('uid' in userData && userData.uid === userId) {
                         delete userData.uid;
                     }
                 }
                 
-                // Store phone number in localStorage if available
-                if (phone) {
-                    localStorage.setItem("phone", phone.toString());
+                // Store phone number
+                if (userPhone) {
+                    localStorage.setItem("phone", userPhone.toString());
                 } else if (data.phone) {
                     localStorage.setItem("phone", data.phone.toString());
+                } else {
+                    localStorage.setItem("phone", phone.toString());
                 }
                 
                 console.log("Storing user data:", userData);
                 console.log("Storing user ID:", userId);
-                console.log("Storing phone:", phone || data.phone);
+                console.log("Storing phone:", userPhone || data.phone || phone);
                 
-                // Store user data if we have something valid
                 if (userData && Object.keys(userData).length > 0) {
                     localStorage.setItem("userData", JSON.stringify(userData));
                 } else {
                     console.warn("Warning: No valid user data found to store");
-                    // Store the whole response as a fallback
                     localStorage.setItem("userData", JSON.stringify(data));
                 }
 
-                // Navigate to home page after successful authentication
                 navigate('/home');
             } else {
                 console.log("Login Failed:", data);
-                setError(data.msg || data.message || "Invalid email or password");
+                setError(data.msg || data.message || "Invalid mobile number or password");
             }
         } catch (error) {
             console.error("Error during login:", error);
             setError("An error occurred. Please try again.");
         }
     }
- 
+
     const [passwordVisible, setPasswordVisible] = useState(false);
- 
+
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
     };
- 
+
     return (
         <div style={{
             minHeight: '100vh',
@@ -157,7 +145,6 @@ const SignIn = () => {
             <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-12 col-md-6 col-lg-4">
-                        {/* Site Header */}
                         <div className="text-center mb-4">
                             <div style={{
                                 background: 'white',
@@ -195,17 +182,24 @@ const SignIn = () => {
                                 )}
                                 <form onSubmit={handleSubmit}>
                                     <div className="form-group mb-4">
-                                        <label htmlFor="email" className="form-label fw-semibold text-dark mb-2">
-                                            📧 Email Address
+                                        <label htmlFor="phone" className="form-label fw-semibold text-dark mb-2">
+                                            📞 Mobile Number
                                         </label>
                                         <input
-                                            type="email"
+                                            type="tel"
                                             className="form-control py-3"
-                                            id="email"
-                                            placeholder="Enter your email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            id="phone"
+                                            placeholder="Enter your 10-digit mobile number"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
                                             required
+                                            pattern="\d{10}"
+                                            maxLength="10"
+                                            onInput={(e) => {
+                                                e.target.value = e.target.value
+                                                    .replace(/[^0-9]/g, "")
+                                                    .slice(0, 10);
+                                            }}
                                             style={{
                                                 borderRadius: '12px',
                                                 border: '2px solid #e5e7eb',
@@ -246,7 +240,7 @@ const SignIn = () => {
                                             <FontAwesomeIcon icon={passwordVisible ? faEyeSlash : faEye} />
                                         </span>
                                     </div>
-     
+
                                     <button 
                                         type="submit" 
                                         className="btn w-100 py-3 fw-bold"
@@ -284,5 +278,5 @@ const SignIn = () => {
         </div>
     );
 }
- 
+
 export default SignIn;

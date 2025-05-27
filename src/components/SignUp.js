@@ -7,7 +7,6 @@ import baseurl from "../Api Service/ApiService";
 function SignUp() {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -33,7 +32,7 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, email, phone, password, confirmPassword } = formData;
+    const { name, phone, password, confirmPassword } = formData;
 
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
@@ -42,7 +41,6 @@ function SignUp() {
 
     const data = {
       name,
-      email,
       phone,
       password,
       confirm_password: confirmPassword,
@@ -67,7 +65,6 @@ function SignUp() {
       alert("Registration successful!");
       setFormData({
         name: "",
-        email: "",
         phone: "",
         password: "",
         confirmPassword: "",
@@ -148,26 +145,7 @@ function SignUp() {
                       }}
                     />
                   </div>
-                  <div className="form-group mb-3">
-                    <label htmlFor="email" className="form-label fw-semibold text-dark mb-2">
-                      📧 Email Address
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control py-3"
-                      id="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      style={{
-                        borderRadius: '12px',
-                        border: '2px solid #e5e7eb',
-                        fontSize: '16px'
-                      }}
-                    />
-                  </div>
-
+                  
                   <div className="form-group mb-3">
                     <label htmlFor="phone" className="form-label fw-semibold text-dark mb-2">
                       📞 Mobile Number

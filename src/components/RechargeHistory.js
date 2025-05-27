@@ -241,19 +241,19 @@ const RechargeHistory = () => {
                     <tr key={recharge.id}>
                       <td>
                         <div className="d-flex align-items-center">
-                          <User size={16} className="text-primary me-2" />
-                          <span className="fw-medium">{recharge.username || 'N/A'}</span>
+                          <User size={14} className="text-primary me-2" />
+                          {recharge.username || 'N/A'}
                         </div>
                       </td>
                       <td>
                         <div className="d-flex align-items-center">
-                          <Phone size={16} className="text-primary me-2" />
+                          <Phone size={14} className="text-primary me-2" />
                           {recharge.mobile_number || 'N/A'}
                         </div>
                       </td>
                       <td>
                         <div className="d-flex align-items-center">
-                          <Tag size={16} className="text-primary me-2" />
+                          <Tag size={14} className="text-primary me-2" />
                           <div>
                             <div className="fw-medium">{recharge.operator}</div>
                             <small className="text-muted">{recharge.plan_type}</small>
@@ -262,27 +262,27 @@ const RechargeHistory = () => {
                       </td>
                       <td>
                         <div className="d-flex align-items-center">
-                          <Award size={16} className="text-primary me-2" />
+                          <Award size={14} className="text-primary me-2" />
                           {recharge.plan_name || 'N/A'}
                         </div>
                       </td>
                       <td>
-                        <div className="d-flex align-items-center fw-bold">
+                        <div className="d-flex align-items-center ">
                           {/* <DollarSign size={16} className="text-success me-1" /> */}
-                          <span>₹{parseFloat(recharge.amount).toFixed(2)}</span>
+                          ₹{parseFloat(recharge.amount).toFixed(2)}
                         </div>
                       </td>
                       <td>
-                        <div className={getStatusBadgeClass(recharge.payment_status)}>
+                        <div className={(recharge.payment_status)}>
                           {recharge.payment_status === 'paid' ? (
                             <>
-                              <CheckCircle size={14} className="me-1" />
-                              <span>Paid</span>
+                              {/* <CheckCircle size={14} className="me-1" /> */}
+                              Paid
                             </>
                           ) : (
                             <>
-                              <AlertCircle size={14} className="me-1" />
-                              <span>Pending</span>
+                              {/* <AlertCircle size={14} className="me-1" /> */}
+                              Pending
                             </>
                           )}
                         </div>
