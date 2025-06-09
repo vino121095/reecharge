@@ -22,6 +22,8 @@ import AddFeaturesForm from './components/Admin Panel/AddFeaturesForm';
 import EmployeesTask from './components/Admin Panel/EmployeesTask';
 import RechargeHistory from './components/RechargeHistory';
 import Payment from './components/Admin Panel/Payment';
+import DeletedHistory from './components/Admin Panel/DeletedHistory';
+
 function App() {
   return (
       <div className="App">
@@ -49,9 +51,11 @@ function App() {
             <Route path="/add-new-feature" element={<AddFeaturesForm />} />
             <Route path='/employees-task' element={<EmployeesTask />} />
             <Route path='/payment' element={<Payment />} />
+            <Route path='/deleted-history' element={<DeletedHistory />} />
           </Routes>
         </div>
       </div>
   );
 }
+
 export default App;

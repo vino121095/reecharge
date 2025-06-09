@@ -18,7 +18,7 @@ const PlansList = () => {
   // Pagination and sorting state
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: 'plan_name', direction: 'ascending' });
+  const [sortConfig, setSortConfig] = useState({ key: 'pid', direction: 'descending' });
  
   const [operator, setOperator] = useState('');
   const [operatorsList, setOperatorsList] = useState([]);
@@ -48,7 +48,9 @@ const PlansList = () => {
       try {
         const response = await axios.get(`${baseurl}/api/plan_list`);
         if (Array.isArray(response.data.data)) {
-          setPlans(response.data.data);
+          // Sort plans by pid in descending order (newest first)
+          const sortedPlans = response.data.data.sort((a, b) => b.pid - a.pid);
+          setPlans(sortedPlans);
         } else {
           console.error("Expected an array but got:", response.data);
           setPlans([]);
@@ -167,6 +169,14 @@ const PlansList = () => {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
  
+    // Special handling for numeric values (pid, prices)
+    if (sortConfig.key === 'pid' || sortConfig.key === 'old_price' || sortConfig.key === 'new_price') {
+      const numA = parseFloat(aValue) || 0;
+      const numB = parseFloat(bValue) || 0;
+      return sortConfig.direction === 'ascending' ? numA - numB : numB - numA;
+    }
+ 
+    // Default string comparison for other fields
     if (aValue < bValue) {
       return sortConfig.direction === 'ascending' ? -1 : 1;
     }

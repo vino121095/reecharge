@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Calendar, Clock, CreditCard, Phone, User, 
   Award, FileText, DollarSign, Tag, CheckCircle, AlertCircle,
-  Home, Download, Printer, Search, Filter, ChevronLeft, RefreshCw
+  Home, Download, Printer, Search, Filter, ChevronLeft, RefreshCw, Trash2
 } from 'lucide-react';
 import axios from 'axios';
 import baseurl from '../Api Service/ApiService';
@@ -14,6 +14,8 @@ const RechargeHistory = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedRecharge, setSelectedRecharge] = useState(null);
   const pdfRef = useRef(null);
   
   // Get user data from localStorage
@@ -105,6 +107,24 @@ const RechargeHistory = () => {
   // Navigate back to home
   const goToHome = () => {
     window.location.href = '/home';
+  };
+
+  // Delete recharge history
+  const handleDelete = async (rechargeId) => {
+    try {
+      const response = await axios.delete(`${baseurl}/api/home_data/${rechargeId}`);
+      if (response.status === 204) {
+        // Remove the deleted item from the state
+        setRechargeHistory(prevHistory => 
+          prevHistory.filter(item => item.id !== rechargeId)
+        );
+        setShowDeleteModal(false);
+        setSelectedRecharge(null);
+      }
+    } catch (err) {
+      console.error('Error deleting recharge:', err);
+      setError('Failed to delete recharge. Please try again later.');
+    }
   };
 
   if (loading) {
@@ -234,6 +254,7 @@ const RechargeHistory = () => {
                     <th>Amount</th>
                     <th>Status</th>
                     <th>Payment Date</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -299,6 +320,17 @@ const RechargeHistory = () => {
                           </div>
                         )}
                       </td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => {
+                            setSelectedRecharge(recharge);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -321,6 +353,62 @@ const RechargeHistory = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedRecharge && (
+        <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSelectedRecharge(null);
+                  }}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to delete this recharge record?</p>
+                <div className="alert alert-warning">
+                  <strong>Details:</strong>
+                  <ul className="mb-0 mt-2">
+                    <li>Mobile: {selectedRecharge.mobile_number}</li>
+                    <li>Operator: {selectedRecharge.operator}</li>
+                    <li>Amount: ₹{parseFloat(selectedRecharge.amount).toFixed(2)}</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSelectedRecharge(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => handleDelete(selectedRecharge.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal Backdrop */}
+      {showDeleteModal && (
+        <div className="modal-backdrop fade show"></div>
+      )}
     </div>
   );
 };

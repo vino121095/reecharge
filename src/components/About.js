@@ -12,11 +12,59 @@ const About = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [planFeatures, setPlanFeatures] = useState({}); // Store features for each plan
     const navigate = useNavigate();
     const location = useLocation();
  
     const { operator, planType, homeDataId } = location.state || {}; // operator and planType passed from the home page
  
+    // Function to build image URL for features
+    const buildImageUrl = (imagePath) => {
+        if (!imagePath) {
+            return '/assets/icons/feature-default.png'; 
+        }
+        
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            return imagePath;
+        }
+        
+        if (imagePath.includes('/uploads/')) {
+            return `${baseurl}${imagePath}`;
+        }
+        
+        if (!imagePath.startsWith('/')) {
+            return `${baseurl}/api/features/image/${imagePath}`;
+        }
+        
+        const base = baseurl.endsWith('/') ? baseurl.slice(0, -1) : baseurl;
+        const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+        
+        return `${base}${path}`;
+    };
+
+    // Function to handle image error
+    const handleImageError = (e, defaultImage) => {
+        if (!e.target.src.includes(defaultImage.split('/').pop())) {
+            e.target.src = defaultImage;
+            e.target.onerror = null;
+        }
+    };
+
+    // Fetch plan features for a specific plan
+    const fetchPlanFeatures = async (planId) => {
+        try {
+            const response = await axios.get(`${baseurl}/api/plan-features/plan/${planId}`);
+            if (response.data && response.data.data) {
+                setPlanFeatures(prev => ({
+                    ...prev,
+                    [planId]: response.data.data
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching plan features:', error);
+        }
+    };
+
     // Fetch categories and plans when the component mounts
     useEffect(() => {
         const fetchCategories = async () => {
@@ -35,6 +83,11 @@ const About = () => {
                 const response = await axios.get(`${baseurl}/api/plan_list`);
                 // console.log('Plans:', response.data); // Log the plans
                 setPlans(response.data.data || []);
+                
+                // Fetch features for each plan
+                response.data.data.forEach(plan => {
+                    fetchPlanFeatures(plan.pid);
+                });
             } catch (error) {
                 setError("Error fetching plans.");
                 console.error("Error fetching plans:", error);
@@ -109,13 +162,28 @@ const About = () => {
  
     return (
         <div className="container">
-            <div className="d-flex align-items-center mt-4">
+            <div 
+                className="d-flex align-items-center mt-4"
+                style={{
+                    background: 'linear-gradient(135deg, #0D6EFD 0%, #0856D6 100%)',
+                    color: 'white',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                }}
+            >
                 <i
                     className="bi bi-arrow-left"
-                    style={{ cursor: 'pointer', marginRight: '30px', marginBottom: '10px', fontSize: '20px' }}
+                    style={{ 
+                        cursor: 'pointer', 
+                        marginRight: '30px', 
+                        marginBottom: '10px', 
+                        fontSize: '20px',
+                        color: 'white'
+                    }}
                     onClick={() => navigate(-1)}
                 ></i>
-                <h4 className="text-center">Available Recharge Plans for {operator} ({planType})</h4>
+                <h4 className="text-center mb-0">Rbtamilan Recharge Plans for {operator} ({planType})</h4>
             </div>
  
             <form className="d-flex justify-content-center mb-4 mt-4" onSubmit={(e) => e.preventDefault()}>
@@ -158,6 +226,33 @@ const About = () => {
                                     <p id='plantext'>Data: {plan.data} GB</p>
                                     <p id='plantext'>Validity: {plan.validity} days</p>
                                     <p id='plantext'>Calls: {plan.cells} Calls</p>
+                                    
+                                    {/* Extra Benefits Section */}
+                                    {planFeatures[plan.pid] && planFeatures[plan.pid].length > 0 && (
+                                        <div className="mt-3 pt-3 border-top">
+                                            <h6 className="mb-2">Extra Benefits:</h6>
+                                            <div className="d-flex flex-wrap justify-content-center gap-2">
+                                                {planFeatures[plan.pid].map((feature, index) => (
+                                                    <div key={index} className="d-flex align-items-center">
+                                                        {feature.Feature?.image_path && (
+                                                            <img 
+                                                                src={buildImageUrl(feature.Feature.image_path)} 
+                                                                alt={feature.Feature.feature_name || 'Feature'}
+                                                                style={{ 
+                                                                    width: '20px', 
+                                                                    height: '20px', 
+                                                                    marginRight: '5px',
+                                                                    objectFit: 'contain'
+                                                                }}
+                                                                onError={(e) => handleImageError(e, '/assets/icons/feature-default.png')}
+                                                            />
+                                                        )}
+                                                        <small>{feature.Feature?.feature_name}</small>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

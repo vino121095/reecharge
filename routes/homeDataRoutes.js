@@ -16,9 +16,13 @@ const {
     getEmployeePendingHomeData,
     getEmployeePaidHomeData,    
     getEmployeeAllHomeData,
-    getUserRechargeHistory    
+    getUserRechargeHistory,
+    deleteUserRechargeHistory,
+    getDeletedHomeData,
+    permanentDeleteHomeData
 } = require('../controllers/homeDataControllers');
- 
+const { authenticateToken } = require('../controllers/userController');
+
 // Create new HomeData entry
 router.post('/home_data', homeDataValidator, validate, createHomeData);
  
@@ -33,7 +37,10 @@ router.get('/home_data/pending', getAllPendingHomeData);
 
 // Get paid home data
 router.get('/home_data/paid', getAllPaidHomeData);
- 
+
+// Get deleted HomeData entries
+router.get('/home_data/deleted', getDeletedHomeData);
+
 // Get HomeData by ID
 router.get('/home_data/:id', getHomeDataById);
  
@@ -42,6 +49,9 @@ router.get('/home_data/:id', getHomeDataById);
  
 // Delete HomeData entry
 router.delete('/home_data/:id', deleteHomeData);
+
+// Permanent delete HomeData
+router.delete('/home_data/permanent/:id', permanentDeleteHomeData);
 
 router.get('/home_data/getemployeedata/:id', getEmployeePendingHomeData);
 
@@ -52,6 +62,8 @@ router.get('/home_data/paid/employee/:id', getEmployeePaidHomeData);
 
 router.get('/home_data/user/phone/:userId', getUserRechargeHistory);
 
- 
+// Delete user recharge history (protected route)
+router.delete('/home_data/user/:id', authenticateToken, deleteUserRechargeHistory);
+
 module.exports = router;
  

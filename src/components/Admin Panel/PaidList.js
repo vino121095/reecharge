@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../AdminLayout';
 import baseurl from '../../Api Service/ApiService';
+import { Search } from 'lucide-react';
 
 function PaidList() {
   const [paidList, setPaidList] = useState([]);
@@ -13,6 +14,8 @@ function PaidList() {
   const [showDateRange, setShowDateRange] = useState(false);
   const [userType, setUserType] = useState('');
   const [userId, setUserId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchField, setSearchField] = useState('all');
 
   // Format date to match UserList format (DD-MM-YYYY HH:MM)
   const formatDateTime = (dateString) => {
@@ -253,6 +256,27 @@ function PaidList() {
     setShowDateRange(value === 'date-range');
   };
 
+  // Filter data based on search term
+  const getFilteredData = () => {
+    if (!searchTerm) return getSortedData();
+
+    const searchTermLower = searchTerm.toLowerCase();
+    return getSortedData().filter(user => {
+      if (searchField === 'all') {
+        return (
+          (user.username && user.username.toLowerCase().includes(searchTermLower)) ||
+          (user.mobile_number && user.mobile_number.includes(searchTerm)) ||
+          (user.operator && user.operator.toLowerCase().includes(searchTermLower)) ||
+          (user.plan_type && user.plan_type.toLowerCase().includes(searchTermLower))
+        );
+      } else {
+        const fieldValue = user[searchField];
+        if (!fieldValue) return false;
+        return fieldValue.toString().toLowerCase().includes(searchTermLower);
+      }
+    });
+  };
+
   if (loading) return (
     <AdminLayout>
       <div className="container mt-4">
@@ -323,6 +347,41 @@ function PaidList() {
             </div>
           </div>
           <div className="card-body">
+            {/* Search Controls */}
+            <div className="row mb-3">
+              <div className="col-md-8">
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <Search size={16} />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <select
+                    className="form-select"
+                    style={{ maxWidth: '150px' }}
+                    value={searchField}
+                    onChange={(e) => setSearchField(e.target.value)}
+                  >
+                    <option value="all">All Fields</option>
+                    <option value="username">Username</option>
+                    <option value="mobile_number">Phone Number</option>
+                    <option value="operator">Operator</option>
+                    <option value="plan_type">Plan Type</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-md-4 text-end">
+                <small className="text-muted">
+                  Showing {getFilteredData().length} of {paidList.length} records
+                </small>
+              </div>
+            </div>
+
             <div className="table-responsive">
               <table className="table text-center">
                 <thead>
@@ -364,12 +423,14 @@ function PaidList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedData.length === 0 ? (
+                  {getFilteredData().length === 0 ? (
                     <tr>
-                      <td colSpan="11">No paid users found.</td>
+                      <td colSpan="11">
+                        {searchTerm ? 'No matching records found.' : 'No paid users found.'}
+                      </td>
                     </tr>
                   ) : (
-                    sortedData.map((user, index) => (
+                    getFilteredData().map((user, index) => (
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>{user.username || '-'}</td>

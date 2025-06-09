@@ -79,23 +79,37 @@ const UserList = () => {
       const data = await response.json();
 
       // Process the data to handle null values and add flags
-      const processedData = data.map(user => ({
-        ...user,
-        plan_type: user.plan_type || '',
-        mobile_number: user.mobile_number || '',
-        operator: user.operator || '',
-        payment_date: user.payment_date || '',
-        username: user.username || '',
-        status: user.payment_status || 'pending',
-        hasPrice: user.amount && parseFloat(user.amount) > 0,
-        old_price: user.old_price || 0,
-        // Format screenshot path correctly
-        screenshot_url: formatImagePath(user.screenshot_url || user.screenshot_path || null),
-        // Add flag to check if user has uploaded screenshot
-        hasScreenshot: !!(user.screenshot_url || user.screenshot_path)
-      }));
+      const processedData = data
+        .filter(user => !user.deleted_at) // Filter out deleted records
+        .map(user => ({
+          ...user,
+          plan_type: user.plan_type || '',
+          mobile_number: user.mobile_number || '',
+          operator: user.operator || '',
+          payment_date: user.payment_date || '',
+          username: user.username || '',
+          status: user.payment_status || 'pending',
+          hasPrice: user.amount && parseFloat(user.amount) > 0,
+          old_price: user.old_price || 0,
+          screenshot_url: formatImagePath(user.screenshot_url || user.screenshot_path || null),
+          hasScreenshot: !!(user.screenshot_url || user.screenshot_path)
+        }));
 
-      setOperators(processedData);
+      // Sort the data by creation date in descending order (most recent first)
+      const sortedData = processedData.sort((a, b) => {
+        // First try to sort by user_payment_datetime
+        const dateA = a.user_payment_datetime ? new Date(a.user_payment_datetime).getTime() : 0;
+        const dateB = b.user_payment_datetime ? new Date(b.user_payment_datetime).getTime() : 0;
+        
+        if (dateA !== dateB) {
+          return dateB - dateA; // Most recent first
+        }
+        
+        // If dates are equal or both 0, sort by ID (assuming higher ID means more recent)
+        return b.id - a.id;
+      });
+
+      setOperators(sortedData);
       setTotalRecords(data.length);
       
       // If employee role, count how many records are assigned to this employee
@@ -187,12 +201,15 @@ const UserList = () => {
       try {
         setDeleteInProgress(true);
         
-        // Call the delete API endpoint
+        // Call the delete API endpoint with the deleted_at timestamp
         const response = await fetch(`${baseurl}/api/home_data/${userId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          body: JSON.stringify({
+            deleted_at: new Date().toISOString()
+          })
         });
 
         if (!response.ok) {

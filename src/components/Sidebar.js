@@ -52,9 +52,24 @@ function Sidebar({ isOpen, toggleSidebar }) {
             </div>
             <div className='newsidebarsize'>
                 <ul>
-                    <Link to="/userlist">
-                        <li className={activeLink === '/userlist' ? 'active-link' : ''}>Recharge</li>
-                    </Link>
+                    <li className="nav-item">
+                        <Link
+                            to="/userlist"
+                            className={`nav-link ${activeLink === '/userlist' ? 'active' : ''}`}
+                            onClick={() => window.innerWidth < 992 && toggleSidebar()}
+                        >
+                            User List
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link
+                            to="/deleted-history"
+                            className={`nav-link ${activeLink === '/deleted-history' ? 'active' : ''}`}
+                            onClick={() => window.innerWidth < 992 && toggleSidebar()}
+                        >
+                            Deleted History
+                        </Link>
+                    </li>
                     <Link to="/paidlist">
                         <li className={activeLink === '/paidlist' ? 'active-link' : ''}>Paid List</li>
                     </Link>

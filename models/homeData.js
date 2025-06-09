@@ -76,6 +76,10 @@ const HomeData = sequelize.define('home_data', {
     screenshot_uploaded_at: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    deleted_at: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     tableName: 'home_data',

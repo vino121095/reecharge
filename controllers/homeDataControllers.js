@@ -1,6 +1,7 @@
 const HomeData = require('../models/homeData'); // Adjust path as needed
  const Employee = require('../models/addEmployee');
  const User = require('../models/user');
+ const { Op } = require('sequelize');
 
 const createHomeData = async (req, res) => {
     try {
@@ -121,18 +122,44 @@ const getHomeDataById = async (req, res) => {
 //     }
 // };
  
-// Delete HomeData entry
+// Get all deleted HomeData entries
+const getDeletedHomeData = async (req, res) => {
+    try {
+        const deletedData = await HomeData.findAll({
+            where: {
+                deleted_at: {
+                    [Op.ne]: null
+                }
+            },
+            order: [['deleted_at', 'DESC']]
+        });
+        res.json(deletedData);
+    } catch (error) {
+        console.error('Error fetching deleted data:', error);
+        res.status(500).json({ message: 'Error fetching deleted data' });
+    }
+};
+
+// Delete HomeData (soft delete)
 const deleteHomeData = async (req, res) => {
     try {
-        const deleted = await HomeData.destroy({
-            where: { id: req.params.id },
-        });
-        if (!deleted) {
+        const { id } = req.params;
+        const { deleted_at } = req.body;
+
+        const homeData = await HomeData.findByPk(id);
+        if (!homeData) {
             return res.status(404).json({ message: 'HomeData not found' });
         }
-        return res.status(204).send();
+
+        // Update the record with deleted_at timestamp instead of actually deleting it
+        await homeData.update({
+            deleted_at: deleted_at || new Date()
+        });
+
+        res.json({ message: 'HomeData deleted successfully' });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        console.error('Error deleting HomeData:', error);
+        res.status(500).json({ message: 'Error deleting HomeData' });
     }
 };
  
@@ -224,6 +251,60 @@ const getUserRechargeHistory = async (req, res) => {
     }
 };
 
+// Delete user recharge history
+const deleteUserRechargeHistory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.uid; // Get user ID from authenticated user
+
+        // Find the recharge record
+        const rechargeRecord = await HomeData.findOne({
+            where: { 
+                id: id,
+                userId: userId // Ensure the record belongs to the user
+            }
+        });
+
+        if (!rechargeRecord) {
+            return res.status(404).json({ 
+                message: 'Recharge record not found or you do not have permission to delete it' 
+            });
+        }
+
+        // Delete the record
+        await rechargeRecord.destroy();
+        
+        return res.status(200).json({ 
+            message: 'Recharge record deleted successfully' 
+        });
+    } catch (error) {
+        console.error('Error deleting recharge history:', error);
+        return res.status(500).json({ 
+            message: 'Failed to delete recharge record',
+            error: error.message 
+        });
+    }
+};
+
+// Permanent delete HomeData
+const permanentDeleteHomeData = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const homeData = await HomeData.findByPk(id);
+        if (!homeData) {
+            return res.status(404).json({ message: 'HomeData not found' });
+        }
+
+        // Permanently delete the record
+        await homeData.destroy();
+
+        res.json({ message: 'HomeData permanently deleted' });
+    } catch (error) {
+        console.error('Error permanently deleting HomeData:', error);
+        res.status(500).json({ message: 'Error permanently deleting HomeData' });
+    }
+};
 
 // Add these to your module.exports
 module.exports = {
@@ -238,6 +319,9 @@ module.exports = {
     getEmployeePendingHomeData,
     getEmployeePaidHomeData,    // Added
     getEmployeeAllHomeData ,
-    getUserRechargeHistory    // Added
+    getUserRechargeHistory,
+    deleteUserRechargeHistory,    // Add the new controller
+    getDeletedHomeData,
+    permanentDeleteHomeData
 };
  

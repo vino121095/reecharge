@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const { Sequelize } = require('sequelize');
 const multer = require('multer');
+const PlanFeature = require('../models/planFeature');
+const PlanList = require('../models/planList');
 
 // Set up multer storage configuration
 const storage = multer.diskStorage({
@@ -230,6 +232,38 @@ exports.deleteFeature = async (req, res) => {
       });
     }
 
+    // Get all plans using this feature
+    const planFeatures = await PlanFeature.findAll({
+      where: {
+        feature_id: feature.f_id
+      },
+      include: [
+        {
+          model: PlanList,
+          attributes: ['pid', 'plan_name', 'extra_features']
+        }
+      ]
+    });
+
+    // Update each plan's extra_features by removing this feature
+    for (const planFeature of planFeatures) {
+      const plan = planFeature.PlanList;
+      if (plan.extra_features) {
+        const features = plan.extra_features.split(', ');
+        const updatedFeatures = features.filter(f => f !== feature.feature_name);
+        await plan.update({
+          extra_features: updatedFeatures.join(', ')
+        });
+      }
+    }
+
+    // Delete all plan_features entries for this feature
+    await PlanFeature.destroy({
+      where: {
+        feature_id: feature.f_id
+      }
+    });
+
     // Store the image path before deleting the database record
     const imagePath = feature.image_path;
     
@@ -248,7 +282,7 @@ exports.deleteFeature = async (req, res) => {
     
     return res.status(200).json({
       success: true,
-      message: 'Feature and associated image deleted successfully'
+      message: 'Feature deleted successfully and removed from all associated plans'
     });
   } catch (error) {
     console.error('Error deleting feature:', error);
