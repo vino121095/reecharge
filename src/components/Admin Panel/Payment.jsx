@@ -347,6 +347,23 @@ const Payment = () => {
                                         </button>
                                     </div>
                                     
+                                    {/* Payment Completed Button */}
+                                    <div className="d-grid mb-3">
+                                        <button
+                                            className="btn btn-success btn-lg py-3"
+                                            onClick={verifyPayment}
+                                            disabled={loading}
+                                            style={{
+                                                borderRadius: '8px',
+                                                fontSize: '16px',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            <i className="bi bi-check-circle me-2"></i>
+                                            {loading ? 'Verifying...' : 'Payment Completed'}
+                                        </button>
+                                    </div>
+                                    
                                     <p className="text-muted small">
                                         Scan this QR code with any UPI app to pay
                                     </p>
@@ -404,23 +421,6 @@ const Payment = () => {
                                         <li>Complete the payment</li>
                                         <li>Click "Payment Completed" button below</li>
                                     </ol>
-                                </div>
-                                
-                                {/* Complete Payment Button */}
-                                <div className="d-grid">
-                                    <button
-                                        className="btn btn-success btn-lg py-3"
-                                        onClick={verifyPayment}
-                                        disabled={loading}
-                                        style={{
-                                            borderRadius: '8px',
-                                            fontSize: '16px',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        <i className="bi bi-check-circle me-2"></i>
-                                        {loading ? 'Verifying...' : 'Payment Completed'}
-                                    </button>
                                 </div>
                             </div>
                         </div>

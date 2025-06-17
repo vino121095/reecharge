@@ -101,7 +101,7 @@ const PaymentSuccess = () => {
             
             setUploadStatus({
                 type: 'success',
-                message: 'Screenshot uploaded successfully! Redirecting to recharge history...'
+                message: 'Screenshot uploaded successfully!'
             });
             
             // Set flag that a screenshot exists
@@ -113,11 +113,21 @@ const PaymentSuccess = () => {
             // Clear the file input
             setFile(null);
             document.getElementById('screenshotUpload').value = '';
+
+            // Calculate savings
+            const savings = paymentData.old_price - paymentData.amount;
             
-            // Redirect to recharge history after successful upload
-            setTimeout(() => {
-                navigate('/recharge-history');
-            }, 2000);
+            // Navigate to savings success page with calculated savings
+            navigate('/savings-success', {
+                state: {
+                    savings: savings,
+                    planDetails: {
+                        plan_name: paymentData.plan_name,
+                        old_price: paymentData.old_price,
+                        new_price: paymentData.amount
+                    }
+                }
+            });
             
         } catch (err) {
             console.error('Error uploading screenshot:', err);
@@ -306,60 +316,8 @@ const PaymentSuccess = () => {
                             <p className="text-muted">Your mobile recharge has been completed successfully</p>
                         </div>
 
-                        {/* Recharge Details Card */}
-                        <div className="card shadow-sm">
-                            <div className="card-header bg-light">
-                                <h5 className="mb-0">Recharge Details</h5>
-                            </div>
-                            <div className="card-body">
-                                <div className="row g-3">
-                                    <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Customer Name</span>
-                                            <span className="fw-bold">{paymentData.username}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Mobile Number</span>
-                                            <span className="fw-bold">{formatMobile(paymentData.mobile_number)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Operator</span>
-                                            <span className="fw-bold">{paymentData.operator}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Plan Type</span>
-                                            <span className="fw-bold text-capitalize">{paymentData.plan_type}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Amount</span>
-                                            <span className="fw-bold">₹{paymentData.amount}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Date & Time</span>
-                                            <span className="fw-bold">{formatDate(paymentData.payment_date)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Screenshot Upload Card */}
-                        <div className="card shadow-sm mt-4">
+                        <div className="card shadow-sm mb-4">
                             <div className="card-header bg-light">
                                 <h5 className="mb-0">Save Your Receipt</h5>
                             </div>
@@ -431,6 +389,58 @@ const PaymentSuccess = () => {
                                             </div>
                                         )}
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recharge Details Card */}
+                        <div className="card shadow-sm">
+                            <div className="card-header bg-light">
+                                <h5 className="mb-0">Recharge Details</h5>
+                            </div>
+                            <div className="card-body">
+                                <div className="row g-3">
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Customer Name</span>
+                                            <span className="fw-bold">{paymentData.username}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Mobile Number</span>
+                                            <span className="fw-bold">{formatMobile(paymentData.mobile_number)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Operator</span>
+                                            <span className="fw-bold">{paymentData.operator}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Plan Type</span>
+                                            <span className="fw-bold text-capitalize">{paymentData.plan_type}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Amount</span>
+                                            <span className="fw-bold">₹{paymentData.amount}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12">
+                                        <div className="d-flex justify-content-between align-items-center py-2">
+                                            <span className="text-muted">Date & Time</span>
+                                            <span className="fw-bold">{formatDate(paymentData.payment_date)}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

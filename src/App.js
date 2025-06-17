@@ -18,6 +18,7 @@ import PrivacyPolicy from './PrivacyPolicy';
 import AboutUs from './components/AboutUs';
 import Services from './components/Service';
 import PaymentSuccess from './components/PaymentSuccess';
+import SavingsSuccess from './components/SavingsSuccess';
 import AddFeaturesForm from './components/Admin Panel/AddFeaturesForm';
 import EmployeesTask from './components/Admin Panel/EmployeesTask';
 import RechargeHistory from './components/RechargeHistory';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/recharge-history" element={<RechargeHistory />} />
+            <Route path="/savings-success" element={<SavingsSuccess />} />
             {/* Backend */}
             <Route path="/admin" element={<Login />} />
             <Route path="/userlist" element={<UserList />} />
