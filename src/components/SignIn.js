@@ -28,10 +28,8 @@ const SignIn = () => {
             });
 
             const data = await response.json();
-            console.log(data);
             
             if (response.ok) {
-                console.log("Login successful data:", data);
                 
                 // Store authentication token in localStorage
                 if (data.token) {
@@ -105,10 +103,6 @@ const SignIn = () => {
                     localStorage.setItem("phone", phone.toString());
                 }
                 
-                console.log("Storing user data:", userData);
-                console.log("Storing user ID:", userId);
-                console.log("Storing phone:", userPhone || data.phone || phone);
-                
                 if (userData && Object.keys(userData).length > 0) {
                     localStorage.setItem("userData", JSON.stringify(userData));
                 } else {
@@ -118,7 +112,6 @@ const SignIn = () => {
 
                 navigate('/home');
             } else {
-                console.log("Login Failed:", data);
                 setError(data.msg || data.message || "Invalid mobile number or password");
             }
         } catch (error) {

@@ -30,7 +30,6 @@ const Login = () => {
       const data = await response.json();
  
       if (response.ok) {
-        console.log("Login successful");
  
         // Store user details in localStorage
         localStorage.setItem('userType', userType);
@@ -45,7 +44,6 @@ const Login = () => {
         setEmail("");
         setPassword("");
       } else {
-        console.log("Login Failed");
         alert(data.msg || "Login failed"); // Provide user feedback
       }
     } catch (error) {

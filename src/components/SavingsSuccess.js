@@ -7,6 +7,9 @@ const SavingsSuccess = () => {
     const { savings, planDetails } = location.state || {};
     
     const [showContent, setShowContent] = useState(false);
+    const [userName, setUserName] = useState('');
+    const [userId, setUserId] = useState('');
+    const [showConfetti, setShowConfetti] = useState(true);
 
     useEffect(() => {
         // Trigger content animation after component mounts
@@ -14,7 +17,37 @@ const SavingsSuccess = () => {
             setShowContent(true);
         }, 500);
 
-        return () => clearTimeout(timer);
+        // Get user data from localStorage
+        try {
+            const userDataString = localStorage.getItem('userData');
+            const userIdString = localStorage.getItem('userId');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                setUserName(
+                    userData.name ||
+                    userData.username ||
+                    userData.firstName ||
+                    (userData.email ? userData.email.split('@')[0] : '') ||
+                    'User'
+                );
+            }
+            if (userIdString) {
+                setUserId(userIdString);
+            }
+        } catch (err) {
+            setUserName('User');
+            setUserId('');
+        }
+
+        // Hide confetti after 6 seconds
+        const confettiTimer = setTimeout(() => {
+            setShowConfetti(false);
+        }, 6000);
+
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(confettiTimer);
+        };
     }, []);
 
     if (!savings || !planDetails) {
@@ -243,19 +276,21 @@ const SavingsSuccess = () => {
             `}</style>
             
             {/* Confetti Animation */}
-            <div style={styles.confettiContainer}>
-                {confettiPieces.map((piece) => (
-                    <div
-                        key={piece.id}
-                        style={{
-                            ...styles.confettiPiece,
-                            left: `${piece.left}%`,
-                            backgroundColor: piece.color,
-                            animationDelay: `${piece.animationDelay}s`
-                        }}
-                    />
-                ))}
-            </div>
+            {showConfetti && (
+                <div style={styles.confettiContainer}>
+                    {confettiPieces.map((piece) => (
+                        <div
+                            key={piece.id}
+                            style={{
+                                ...styles.confettiPiece,
+                                left: `${piece.left}%`,
+                                backgroundColor: piece.color,
+                                animationDelay: `${piece.animationDelay}s`
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Header */}
             <div style={styles.header}>
@@ -277,6 +312,12 @@ const SavingsSuccess = () => {
             <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
                 <div className="row justify-content-center">
                     <div className="col-12 col-md-8 col-lg-6" style={styles.mainContent}>
+                        {/* User Info */}
+                        <div className="text-center mb-4">
+                            <h5 className="fw-bold" style={{ color: '#1a73e8' }}>
+                                Welcome, {userName}{userId ? ` (ID: ${userId})` : ''}
+                            </h5>
+                        </div>
                         {/* Celebration Header */}
                         <div className="text-center mb-4">
                             <div className="mb-3" style={styles.celebrationIcon}>
@@ -299,61 +340,30 @@ const SavingsSuccess = () => {
                                 background: 'linear-gradient(135deg, #1a73e8 0%, #4285f4 100%)',
                                 color: 'white'
                             }}>
-                                <h2 className="display-3 mb-3 fw-bold" style={styles.savingsAmount}>
+                                <h1 className="display-3 mb-3 fw-bold" style={{
+                                    ...styles.savingsAmount,
+                                    fontSize: '3rem',
+                                }}>
                                     ₹{savings}
-                                </h2>
+                                </h1>
                                 <p style={{ margin: 0, fontSize: '1.25rem', opacity: 0.9 }}>Total Savings</p>
                                 <div className="mt-3">
-                                    <span className="badge bg-light text-dark px-3" style={{
-                                        padding: '0.5rem 1rem',
-                                        borderRadius: '50rem',
-                                        color: '#1a73e8'
-                                    }}>
-                                        🎊 Amazing Deal!
+                                    <span
+                                        className="fw-bold"
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: '1.7rem',
+                                            letterSpacing: '1px',
+                                            background: 'linear-gradient(90deg, #f7971e 0%, #ffd200 100%)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent',
+                                            backgroundClip: 'text',
+                                            textFillColor: 'transparent',
+                                            display: 'inline-block',
+                                        }}
+                                    >
+                                        RB Tamilan
                                     </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Plan Details Card */}
-                        <div className="card card-glow mb-4" style={styles.card}>
-                            <div className="card-header" style={{
-                                background: 'linear-gradient(90deg, #e8f0fe, #f1f3f4)',
-                                border: 'none'
-                            }}>
-                                <h5 style={{ margin: 0, fontWeight: 'bold', color: '#1a73e8' }}>📋 Plan Details</h5>
-                            </div>
-                            <div className="card-body p-4">
-                                <div>
-                                    <div className="d-flex" style={{ 
-                                        justifyContent: 'space-between', 
-                                        alignItems: 'center', 
-                                        paddingTop: '1rem',
-                                        paddingBottom: '1rem',
-                                        borderBottom: '1px solid #e8f0fe'
-                                    }}>
-                                        <span className="text-muted fw-bold">📱 Plan Name</span>
-                                        <span className="fw-bold text-dark">{planDetails.plan_name}</span>
-                                    </div>
-                                    <div className="d-flex" style={{ 
-                                        justifyContent: 'space-between', 
-                                        alignItems: 'center', 
-                                        paddingTop: '1rem',
-                                        paddingBottom: '1rem',
-                                        borderBottom: '1px solid #e8f0fe'
-                                    }}>
-                                        <span className="text-muted fw-bold">💰 Original Price</span>
-                                        <span className="fw-bold text-decoration-line-through" style={{ color: '#1a73e8' }}>₹{planDetails.old_price}</span>
-                                    </div>
-                                    <div className="d-flex" style={{ 
-                                        justifyContent: 'space-between', 
-                                        alignItems: 'center', 
-                                        paddingTop: '1rem',
-                                        paddingBottom: '1rem'
-                                    }}>
-                                        <span className="text-muted fw-bold">✨ Discounted Price</span>
-                                        <span className="fw-bold fs-5" style={{ color: '#1a73e8' }}>₹{planDetails.new_price}</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -41,7 +41,6 @@ function Header({ toggleSidebar }) {
             });
  
             const data = await response.json();
-            console.log('Employee Data:');
  
             // If email matches the response, update the user name
             const user = data.find(user => user.email === email);
@@ -68,7 +67,6 @@ function Header({ toggleSidebar }) {
             });
  
             const data = await response.json();
-            console.log('Admin Data:', data);
  
             // If email matches the response, update the user name
             const user = data.find(user => user.email === email);

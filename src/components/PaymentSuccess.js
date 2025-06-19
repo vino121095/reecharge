@@ -396,49 +396,49 @@ const PaymentSuccess = () => {
                         {/* Recharge Details Card */}
                         <div className="card shadow-sm">
                             <div className="card-header bg-light">
-                                <h5 className="mb-0">Recharge Details</h5>
+                                <h5 className="mb-0" style={{ fontSize: '1.05rem' }}>Recharge Details</h5>
                             </div>
                             <div className="card-body">
                                 <div className="row g-3">
                                     <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Customer Name</span>
-                                            <span className="fw-bold">{paymentData.username}</span>
+                                        <div className="d-flex justify-content-between align-items-center py-2" style={{ fontSize: '0.95rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Customer Name</span>
+                                            <span className="fw-bold" style={{ fontSize: '0.95rem' }}>{paymentData.username}</span>
                                         </div>
                                     </div>
 
                                     <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Mobile Number</span>
-                                            <span className="fw-bold">{formatMobile(paymentData.mobile_number)}</span>
+                                        <div className="d-flex justify-content-between align-items-center py-2" style={{ fontSize: '0.95rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Mobile Number</span>
+                                            <span className="fw-bold" style={{ fontSize: '0.95rem' }}>{formatMobile(paymentData.mobile_number)}</span>
                                         </div>
                                     </div>
 
                                     <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Operator</span>
-                                            <span className="fw-bold">{paymentData.operator}</span>
+                                        <div className="d-flex justify-content-between align-items-center py-2" style={{ fontSize: '0.95rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Operator</span>
+                                            <span className="fw-bold" style={{ fontSize: '0.95rem' }}>{paymentData.operator}</span>
                                         </div>
                                     </div>
 
                                     <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Plan Type</span>
-                                            <span className="fw-bold text-capitalize">{paymentData.plan_type}</span>
+                                        <div className="d-flex justify-content-between align-items-center py-2" style={{ fontSize: '0.95rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Plan Type</span>
+                                            <span className="fw-bold text-capitalize" style={{ fontSize: '0.95rem' }}>{paymentData.plan_type}</span>
                                         </div>
                                     </div>
 
                                     <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Amount</span>
-                                            <span className="fw-bold">₹{paymentData.amount}</span>
+                                        <div className="d-flex justify-content-between align-items-center py-2" style={{ fontSize: '0.95rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Amount</span>
+                                            <span className="fw-bold" style={{ fontSize: '0.95rem' }}>₹{paymentData.amount}</span>
                                         </div>
                                     </div>
 
                                     <div className="col-12">
-                                        <div className="d-flex justify-content-between align-items-center py-2">
-                                            <span className="text-muted">Date & Time</span>
-                                            <span className="fw-bold">{formatDate(paymentData.payment_date)}</span>
+                                        <div className="d-flex justify-content-between align-items-center py-2" style={{ fontSize: '0.95rem' }}>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Date & Time</span>
+                                            <span className="fw-bold" style={{ fontSize: '0.95rem' }}>{formatDate(paymentData.payment_date)}</span>
                                         </div>
                                     </div>
                                 </div>
