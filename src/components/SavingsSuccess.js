@@ -273,6 +273,11 @@ const SavingsSuccess = () => {
                         left: 100%;
                     }
                 }
+
+                .spotify-gradient {
+                    background: linear-gradient(135deg, #1DB954 0%, #1ed760 50%, #1DB954 100%);
+                    box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
+                }
             `}</style>
             
             {/* Confetti Animation */}
@@ -334,11 +339,16 @@ const SavingsSuccess = () => {
                             <p className="text-muted fs-5">You've saved money on your recharge</p>
                         </div>
 
-                        {/* Savings Card */}
-                        <div className="card card-glow mb-4" style={styles.card}>
-                            <div className="card-body text-center py-5" style={{
-                                background: 'linear-gradient(135deg, #1a73e8 0%, #4285f4 100%)',
-                                color: 'white'
+                        {/* Savings Card - Enhanced Spotify Green */}
+                        <div className="card card-glow mb-4" style={{
+                            ...styles.card,
+                            maxWidth: '250px',
+                            margin: '0 auto',
+                        }}>
+                            <div className="card-body text-center py-4 spotify-gradient" style={{
+                                color: 'white',
+                                paddingTop: '2rem',
+                                paddingBottom: '2rem',
                             }}>
                                 <h1 className="display-3 mb-3 fw-bold" style={{
                                     ...styles.savingsAmount,
@@ -352,13 +362,9 @@ const SavingsSuccess = () => {
                                         className="fw-bold"
                                         style={{
                                             fontWeight: 700,
-                                            fontSize: '1.7rem',
+                                            fontSize: '1.5rem',
                                             letterSpacing: '1px',
-                                            background: 'linear-gradient(90deg, #f7971e 0%, #ffd200 100%)',
-                                            WebkitBackgroundClip: 'text',
-                                            WebkitTextFillColor: 'transparent',
-                                            backgroundClip: 'text',
-                                            textFillColor: 'transparent',
+                                            color: '#fff',
                                             display: 'inline-block',
                                         }}
                                     >
