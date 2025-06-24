@@ -20,7 +20,7 @@ const Payment = () => {
     const [error, setError] = useState(null);
 
     // Updated UPI ID (fallback if not passed from previous component)
-    const finalMerchantUpiId = merchantUpiId || "tamilkumaranm143-2@oksbi";
+    const finalMerchantUpiId = "8072054472@axisbank";
     const finalMerchantName = merchantName || "Rbtamilan";
 
     useEffect(() => {
@@ -392,6 +392,21 @@ const Payment = () => {
                                             onClick={() => copyToClipboard(finalMerchantUpiId)}
                                         >
                                             <i className="bi bi-clipboard"></i>
+                                        </button>
+                                        <button
+                                            className="btn btn-outline-success"
+                                            onClick={() => {
+                                                if (navigator.share) {
+                                                    navigator.share({
+                                                        title: 'UPI ID',
+                                                        text: `Pay to UPI ID: ${finalMerchantUpiId}`,
+                                                    });
+                                                } else {
+                                                    copyToClipboard(finalMerchantUpiId);
+                                                }
+                                            }}
+                                        >
+                                            <i className="bi bi-share"></i>
                                         </button>
                                     </div>
                                 </div>
