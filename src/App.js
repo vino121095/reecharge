@@ -2,6 +2,8 @@ import './App.css';
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import ProtectedRoute from './routes/ProtectedRoute';
+import PublicRoute from './routes/PublicRoute';
 import Home from './components/Home';
 import About from './components/About';
 import SignIn from './components/SignIn';
@@ -31,7 +33,9 @@ function App() {
         <div>
           <Routes>
             {/* Frontend */}
-            <Route path="/" element={<SignIn />} />
+            <Route element={<PublicRoute role="user" redirectTo="/home" />}> 
+              <Route path="/" element={<SignIn />} />
+            </Route>
             <Route path="/about" element={<About />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/service" element={<Services />} />
@@ -43,17 +47,21 @@ function App() {
             <Route path="/recharge-history" element={<RechargeHistory />} />
             <Route path="/savings-success" element={<SavingsSuccess />} />
             {/* Backend */}
-            <Route path="/admin" element={<Login />} />
-            <Route path="/userlist" element={<UserList />} />
-            <Route path="/planlist" element={<PlanList />} />
-            <Route path="/operatorlist" element={<OperatorList />} />
-            <Route path="/addemployees" element={<AddEmployees />} />
-            <Route path="/paidlist" element={<PaidList />} />
-            <Route path="/payment-success/:id" element={<PaymentSuccess />} />
-            <Route path="/add-new-feature" element={<AddFeaturesForm />} />
-            <Route path='/employees-task' element={<EmployeesTask />} />
-            <Route path='/payment' element={<Payment />} />
-            <Route path='/deleted-history' element={<DeletedHistory />} />
+            <Route element={<PublicRoute role="admin" redirectTo="/userlist" />}> 
+              <Route path="/admin" element={<Login />} />
+            </Route>
+            <Route element={<ProtectedRoute role="admin" redirectTo="/admin" />}> 
+              <Route path="/userlist" element={<UserList />} />
+              <Route path="/planlist" element={<PlanList />} />
+              <Route path="/operatorlist" element={<OperatorList />} />
+              <Route path="/addemployees" element={<AddEmployees />} />
+              <Route path="/paidlist" element={<PaidList />} />
+              <Route path="/payment-success/:id" element={<PaymentSuccess />} />
+              <Route path="/add-new-feature" element={<AddFeaturesForm />} />
+              <Route path='/employees-task' element={<EmployeesTask />} />
+              <Route path='/payment' element={<Payment />} />
+              <Route path='/deleted-history' element={<DeletedHistory />} />
+            </Route>
           </Routes>
         </div>
       </div>
