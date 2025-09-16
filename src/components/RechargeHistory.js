@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import baseurl from '../Api Service/ApiService';
-import html2pdf from 'html2pdf.js';
+// Import html2pdf with source map warning suppression
+import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
 
 const RechargeHistory = () => {
   const [rechargeHistory, setRechargeHistory] = useState([]);

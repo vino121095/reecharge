@@ -51,5 +51,17 @@
     
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- Suppress source map warnings -->
+    <script>
+      // Suppress source map warnings in console
+      const originalConsoleWarn = console.warn;
+      console.warn = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('Failed to parse source map')) {
+          return; // Suppress source map warnings
+        }
+        originalConsoleWarn.apply(console, args);
+      };
+    </script>
   </body>
 </html>

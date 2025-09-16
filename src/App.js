@@ -46,6 +46,8 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/recharge-history" element={<RechargeHistory />} />
             <Route path="/savings-success" element={<SavingsSuccess />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/payment-success/:id" element={<PaymentSuccess />} />
             {/* Backend */}
             <Route element={<PublicRoute role="admin" redirectTo="/userlist" />}> 
               <Route path="/admin" element={<Login />} />
@@ -56,10 +58,8 @@ function App() {
               <Route path="/operatorlist" element={<OperatorList />} />
               <Route path="/addemployees" element={<AddEmployees />} />
               <Route path="/paidlist" element={<PaidList />} />
-              <Route path="/payment-success/:id" element={<PaymentSuccess />} />
               <Route path="/add-new-feature" element={<AddFeaturesForm />} />
               <Route path='/employees-task' element={<EmployeesTask />} />
-              <Route path='/payment' element={<Payment />} />
               <Route path='/deleted-history' element={<DeletedHistory />} />
             </Route>
           </Routes>
